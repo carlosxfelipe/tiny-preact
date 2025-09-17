@@ -11,7 +11,7 @@ export type FC<P = Record<string, unknown>> = (
 ) => VNode | Child;
 
 export interface VNode {
-  type: string | typeof TEXT | FC<any>;
+  type: string | typeof TEXT | FC<unknown>;
   props: Props;
   children: (VNode | null)[];
   __dom?: Node | null;
@@ -29,6 +29,10 @@ interface HookBag {
   __needsFlush?: boolean;
   __root?: HTMLElement | null; // reserved for potential multi-root support
 }
+
+// --- Root state (avoid DOM monkey-patching) ---------------------------------
+const ROOT_VNODE = new WeakMap<HTMLElement, VNode | null>();
+const ROOT_INST = new WeakMap<HTMLElement, HookBag>();
 
 // --- VNode factory ----------------------------------------------------------
 export function h(
@@ -60,7 +64,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 // Keyed reconciliation helpers
 function getKey(v: VNode | null): unknown {
-  return v?.props && (v.props as any).key;
+  return (v?.props as { key?: unknown })?.key;
 }
 function isSameType(a: VNode | null, b: VNode | null): boolean {
   if (!a || !b) return false;
@@ -72,8 +76,8 @@ export function render(
   vnode: VNode | null,
   container: HTMLElement
 ): Node | null {
-  const prev = ((container as any).__vnode as VNode | null) || null;
-  const inst: HookBag = (container as any).__inst || {
+  const prev = ROOT_VNODE.get(container) ?? null;
+  const inst: HookBag = ROOT_INST.get(container) ?? {
     hooks: [],
     effects: [],
     effectCleanups: [],
@@ -81,8 +85,8 @@ export function render(
   };
   inst.hookIndex = 0;
   const dom = diff(container, prev, vnode, inst);
-  (container as any).__vnode = vnode;
-  (container as any).__inst = inst;
+  ROOT_VNODE.set(container, vnode);
+  ROOT_INST.set(container, inst);
   flushEffects(inst); // effects are actually flushed asynchronously (see scheduleFlush)
   return dom;
 }
@@ -122,7 +126,7 @@ function diff(
     if (dom.nodeValue !== (newVNode.props as any).nodeValue) {
       dom.nodeValue = (newVNode.props as any).nodeValue;
     }
-    (newVNode as any).__dom = dom;
+    newVNode.__dom = dom;
     return dom;
   }
 
@@ -139,7 +143,7 @@ function diff(
       : document.createElement(tag);
     parent.insertBefore(dom, nextSibling);
   }
-  (newVNode as any).__dom = dom;
+  newVNode.__dom = dom;
 
   // Props
   updateProps(
@@ -190,11 +194,11 @@ function diff(
 
     if (childDom) {
       const needsMove =
-        childDom !== prevDom && (childDom as any).previousSibling !== prevDom;
+        childDom !== prevDom && childDom.previousSibling !== prevDom;
       if (needsMove) {
         (dom as Element).insertBefore(
           childDom,
-          prevDom ? (prevDom as any).nextSibling : (dom as Element).firstChild
+          prevDom ? prevDom.nextSibling : (dom as Element).firstChild
         );
       }
       prevDom = childDom;
@@ -224,12 +228,11 @@ function isBooleanProp(name: string) {
 function updateProps(dom: Element, prev: Props, next: Props) {
   // Remove
   for (const k in prev) {
-    if (!(k in next)) setProp(dom, k, null, (prev as any)[k]);
+    if (!(k in next)) setProp(dom, k, null, prev[k]);
   }
   // Add/update
   for (const k in next) {
-    if ((prev as any)[k] !== (next as any)[k])
-      setProp(dom, k, (next as any)[k], (prev as any)[k]);
+    if (prev[k] !== next[k]) setProp(dom, k, next[k], prev[k]);
   }
 }
 
@@ -299,7 +302,7 @@ function setStyle(dom: HTMLElement, next: unknown, prev: unknown) {
     for (const k in prevObj) {
       if (!nextObj || !(k in nextObj)) {
         if (k.startsWith("--") || k.includes("-")) dom.style.removeProperty(k);
-        else (dom.style as any)[k] = "";
+        else (dom.style as unknown as Record<string, string>)[k] = "";
       }
     }
   }
@@ -311,7 +314,7 @@ function setStyle(dom: HTMLElement, next: unknown, prev: unknown) {
     let v = nextObj[k];
     if (v == null) {
       if (k.startsWith("--") || k.includes("-")) dom.style.removeProperty(k);
-      else (dom.style as any)[k] = "";
+      else (dom.style as unknown as Record<string, string>)[k] = "";
       continue;
     }
     // Append "px" for numeric values when the property is dimensional.
@@ -320,22 +323,24 @@ function setStyle(dom: HTMLElement, next: unknown, prev: unknown) {
     if (k.startsWith("--") || k.includes("-")) {
       dom.style.setProperty(k, String(v));
     } else {
-      (dom.style as any)[k] = String(v);
+      (dom.style as unknown as Record<string, string>)[k] = String(v);
     }
   }
 }
 
 function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
   // Alias: allow React-style "className"
-  let propName = name === "className" ? "class" : name;
+  const propName = name === "className" ? "class" : name;
 
   if (propName === "children" || propName === "key" || propName === "ref")
     return; // "key"/"ref" unsupported
 
   if (isEventProp(propName)) {
     const ev = toEventName(propName);
-    if (typeof prev === "function") (dom as any).removeEventListener(ev, prev);
-    if (typeof value === "function") (dom as any).addEventListener(ev, value);
+    if (typeof prev === "function")
+      dom.removeEventListener(ev, prev as EventListener);
+    if (typeof value === "function")
+      dom.addEventListener(ev, value as EventListener);
     return;
   }
 
@@ -346,11 +351,13 @@ function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
   }
 
   const isSvg = dom instanceof SVGElement;
+  const el = dom as HTMLElement & Record<string, unknown>;
 
-  if (!isSvg && propName in (dom as any) && !isBooleanProp(propName)) {
-    (dom as any)[propName] = (value as any) ?? "";
+  if (!isSvg && propName in el && !isBooleanProp(propName)) {
+    el[propName] =
+      (value as string | number | boolean | null | undefined) ?? "";
   } else if (isBooleanProp(propName)) {
-    (dom as any)[propName] = !!value;
+    (el as any)[propName] = !!value;
     if (!value) dom.removeAttribute(propName);
     else dom.setAttribute(propName, "");
   } else {
@@ -376,7 +383,7 @@ function diffComponent(
     effectCleanups: oldVNode?._hooks?.effectCleanups ?? [],
   };
   CURRENT = comp;
-  const rendered = (newVNode.type as FC<any>)({
+  const rendered = (newVNode.type as FC<unknown>)({
     ...(newVNode.props || {}),
     children: newVNode.children,
   });
@@ -390,9 +397,9 @@ function diffComponent(
     _inst,
     nextSibling
   );
-  (newVNode as any)._rendered = norm;
-  (newVNode as any).__dom = dom;
-  (newVNode as any)._hooks = comp;
+  newVNode._rendered = norm;
+  newVNode.__dom = dom;
+  newVNode._hooks = comp;
   queueEffectFlush(comp);
   return dom;
 }
@@ -412,7 +419,7 @@ export function useState<S>(
     comp.hooks[i] = next as unknown;
     const root = findRoot(comp);
     if (root) {
-      const nextTree = cloneVNode((root as any).__vnode as VNode | null);
+      const nextTree = cloneVNode(ROOT_VNODE.get(root) ?? null);
       render(nextTree, root);
     }
   };
@@ -449,7 +456,7 @@ function scheduleFlush() {
       .querySelectorAll<HTMLElement>("[data-tiny-preact-root]")
       .forEach((el) => roots.add(el));
     for (const root of roots) {
-      const vnode = (root as any).__vnode as VNode | null;
+      const vnode = ROOT_VNODE.get(root) ?? null;
       const stack: (VNode | null)[] = [vnode];
       while (stack.length) {
         const v = stack.pop();

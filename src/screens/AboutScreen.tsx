@@ -4,9 +4,8 @@ import Icon from "../icons/Icon.tsx";
 export default function AboutScreen() {
   return (
     <section>
-      <div class="title-with-icon">
-        <h1 style={{ color: "#4338ca" }}>Sobre mim</h1>
-        <Icon name="heart" size={30} color="#dc2626" aria-hidden="true" />
+      <div>
+        <h1>Sobre mim</h1>
       </div>
 
       <p>
@@ -15,34 +14,57 @@ export default function AboutScreen() {
       </p>
 
       <h2>Contato</h2>
-      <ul>
-        <li>
-          Email:{" "}
-          <a href="mailto:carlosxfelipe@gmail.com">carlosxfelipe@gmail.com</a>
+      <ul
+        style={{
+          listStyle: "none",
+          padding: 0,
+          margin: 0,
+          display: "grid",
+          gap: 8,
+        }}
+      >
+        <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Icon name="heart-outline" size={20} aria-hidden="true" />
+          <span>
+            Email:{" "}
+            <a href="mailto:carlosxfelipe@gmail.com">carlosxfelipe@gmail.com</a>
+          </span>
         </li>
-        <li>
-          GitHub:{" "}
-          <a
-            href="https://github.com/carlosxfelipe"
-            target="_blank"
-            rel="noreferrer"
-          >
-            github.com/carlosxfelipe
-          </a>
+
+        <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Icon name="star-outline" size={20} aria-hidden="true" />
+          <span>
+            GitHub:{" "}
+            <a
+              href="https://github.com/carlosxfelipe"
+              target="_blank"
+              rel="noreferrer"
+            >
+              github.com/carlosxfelipe
+            </a>
+          </span>
         </li>
-        <li>
-          LinkedIn:{" "}
-          <a
-            href="https://linkedin.com/in/carlosxfelipe"
-            target="_blank"
-            rel="noreferrer"
-          >
-            linkedin.com/in/carlosxfelipe
-          </a>
+
+        <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Icon name="account-outline" size={20} aria-hidden="true" />
+          <span>
+            LinkedIn:{" "}
+            <a
+              href="https://linkedin.com/in/carlosxfelipe"
+              target="_blank"
+              rel="noreferrer"
+            >
+              linkedin.com/in/carlosxfelipe
+            </a>
+          </span>
         </li>
-        <li>
-          Fortaleza, Ceará, Brasil •{" "}
-          <a href="tel:+5585999502195">(85) 99950-2195</a>
+
+        <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Icon name="map-marker-outline" size={20} aria-hidden="true" />
+          <span>
+            Fortaleza, Ceará, Brasil •{" "}
+            <a href="tel:+5585999502195">(85) 99950-2195</a>
+          </span>
         </li>
       </ul>
     </section>
