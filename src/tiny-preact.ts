@@ -56,6 +56,7 @@ function normalize(node: Child): VNode | null {
 }
 
 const TEXT = Symbol("text");
+const SVG_NS = "http://www.w3.org/2000/svg";
 
 // Keyed reconciliation helpers
 function getKey(v: VNode | null): unknown {
@@ -125,13 +126,17 @@ function diff(
     return dom;
   }
 
-  // Host element
+  // Host element (HTML vs SVG)
   let dom: Node;
   const sameType = oldVNode?.type === newVNode.type;
   if (sameType && oldVNode?.__dom) {
     dom = oldVNode.__dom as Element;
   } else {
-    dom = document.createElement(String(newVNode.type));
+    const tag = String(newVNode.type);
+    const isSvgContext = parent instanceof SVGElement || tag === "svg";
+    dom = isSvgContext
+      ? document.createElementNS(SVG_NS, tag)
+      : document.createElement(tag);
     parent.insertBefore(dom, nextSibling);
   }
   (newVNode as any).__dom = dom;
@@ -246,7 +251,9 @@ function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
     return;
   }
 
-  if (name in (dom as any) && !isBooleanProp(name)) {
+  const isSvg = dom instanceof SVGElement;
+
+  if (!isSvg && name in (dom as any) && !isBooleanProp(name)) {
     (dom as any)[name] = (value as any) ?? "";
   } else if (isBooleanProp(name)) {
     (dom as any)[name] = !!value;

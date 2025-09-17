@@ -359,3 +359,22 @@ svg {
     background: var(--btn-bg);
   }
 }
+
+.inline-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+  color: black;
+}
+
+@media (prefers-color-scheme: dark) {
+  .inline-icon {
+    color: white;
+  }
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

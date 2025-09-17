@@ -1,19 +1,17 @@
 import { h } from "../tiny-preact.ts";
+import Icon from "../icons/Icon.tsx";
 
 export default function AboutScreen() {
   return (
     <section>
-      <h1>Sobre mim</h1>
+      <div class="title-with-icon">
+        <h1>Sobre mim</h1>
+        <Icon name="heart" size={30} class="inline-icon" aria-hidden="true" />
+      </div>
+
       <p>
         Sou <strong>Carlos Felipe Araújo</strong>, desenvolvedor{" "}
         <em>Mobile e Front-end</em>.
-      </p>
-
-      <h2>Resumo</h2>
-      <p>
-        Fui professor de espanhol por vários anos e, nos últimos 3 anos, migrei
-        para desenvolvimento de software. Hoje foco em apps móveis e front-end,
-        com interesse por libs enxutas e deploy estático.
       </p>
 
       <h2>Contato</h2>
