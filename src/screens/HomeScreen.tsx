@@ -20,6 +20,17 @@ export default function HomeScreen() {
         gerar arquivos prontos para produção em <code>dist/</code> e servir de
         forma estática em qualquer CDN ou edge server.
       </p>
+      <p>
+        O código-fonte está disponível no{" "}
+        <a
+          href="https://github.com/carlosxfelipe/tiny-preact"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+        .
+      </p>
     </section>
   );
 }
