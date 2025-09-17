@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Deno lockfile
+deno.lock
+
+# Saída do bundle
+dist/
+
+# Arquivos temporários / editores
+*.log
+*.swp
+*.swo
+*.tmp
+
+# VSCode
+.vscode/

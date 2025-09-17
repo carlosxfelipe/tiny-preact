@@ -1,0 +1,22 @@
+{
+  "tasks": {
+    "serve": "deno run --allow-read --allow-net -q server.ts",
+    "bundle": "deno bundle --outdir dist src/index.html"
+  },
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "h",
+    "strict": true,
+    "lib": [
+      "dom",
+      "esnext",
+      "deno.ns"
+    ],
+    "types": [
+      "./src/jsx.d.ts"
+    ]
+  },
+  "imports": {
+    "@std/http/file-server": "jsr:@std/http/file-server"
+  }
+}
