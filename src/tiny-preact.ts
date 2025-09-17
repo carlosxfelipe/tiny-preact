@@ -233,35 +233,129 @@ function updateProps(dom: Element, prev: Props, next: Props) {
   }
 }
 
-function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
-  if (name === "children" || name === "key" || name === "ref") return; // "key"/"ref" unsupported
+// --- Style helpers ----------------------------------------------------------
+// Non-dimensional CSS properties should not get a "px" suffix for numeric values.
+// Based on React/Preact lists and common SVG attributes.
+const NON_DIMENSIONAL = new Set([
+  "animationIterationCount",
+  "borderImageOutset",
+  "borderImageSlice",
+  "borderImageWidth",
+  "boxFlex",
+  "boxFlexGroup",
+  "boxOrdinalGroup",
+  "columnCount",
+  "columns",
+  "flex",
+  "flexGrow",
+  "flexPositive",
+  "flexShrink",
+  "flexNegative",
+  "flexOrder",
+  "gridRow",
+  "gridRowEnd",
+  "gridRowSpan",
+  "gridRowStart",
+  "gridColumn",
+  "gridColumnEnd",
+  "gridColumnSpan",
+  "gridColumnStart",
+  "fontWeight",
+  "lineClamp",
+  "lineHeight",
+  "opacity",
+  "order",
+  "orphans",
+  "tabSize",
+  "widows",
+  "zIndex",
+  "zoom",
+  // SVG
+  "fillOpacity",
+  "floodOpacity",
+  "stopOpacity",
+  "strokeMiterlimit",
+  "strokeOpacity",
+  "strokeWidth",
+]);
 
-  if (isEventProp(name)) {
-    const ev = toEventName(name);
+type StyleObj = Record<string, string | number | null | undefined>;
+
+/** Apply inline styles with diffing, supporting object or string values. */
+function setStyle(dom: HTMLElement, next: unknown, prev: unknown) {
+  // String: set cssText directly (overwrites everything).
+  if (typeof next === "string") {
+    dom.style.cssText = next;
+    return;
+  }
+
+  const prevObj =
+    prev && typeof prev === "object" ? (prev as StyleObj) : undefined;
+  const nextObj =
+    next && typeof next === "object" ? (next as StyleObj) : undefined;
+
+  // Remove keys that disappeared.
+  if (prevObj) {
+    for (const k in prevObj) {
+      if (!nextObj || !(k in nextObj)) {
+        if (k.startsWith("--") || k.includes("-")) dom.style.removeProperty(k);
+        else (dom.style as any)[k] = "";
+      }
+    }
+  }
+
+  if (!nextObj) return;
+
+  // Apply/overwrite next styles.
+  for (const k in nextObj) {
+    let v = nextObj[k];
+    if (v == null) {
+      if (k.startsWith("--") || k.includes("-")) dom.style.removeProperty(k);
+      else (dom.style as any)[k] = "";
+      continue;
+    }
+    // Append "px" for numeric values when the property is dimensional.
+    if (typeof v === "number" && !NON_DIMENSIONAL.has(k)) v = `${v}px`;
+
+    if (k.startsWith("--") || k.includes("-")) {
+      dom.style.setProperty(k, String(v));
+    } else {
+      (dom.style as any)[k] = String(v);
+    }
+  }
+}
+
+function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
+  // Alias: allow React-style "className"
+  let propName = name === "className" ? "class" : name;
+
+  if (propName === "children" || propName === "key" || propName === "ref")
+    return; // "key"/"ref" unsupported
+
+  if (isEventProp(propName)) {
+    const ev = toEventName(propName);
     if (typeof prev === "function") (dom as any).removeEventListener(ev, prev);
     if (typeof value === "function") (dom as any).addEventListener(ev, value);
     return;
   }
 
-  // Only object-based inline styles are supported
-  if (name === "style" && value && typeof value === "object") {
-    const style = value as Record<string, unknown>;
-    for (const s in style)
-      (dom as HTMLElement).style[s as any] = (style as any)[s] ?? "";
+  // Robust inline style support: string or object, with diffing and units.
+  if (propName === "style") {
+    setStyle(dom as HTMLElement, value, prev);
     return;
   }
 
   const isSvg = dom instanceof SVGElement;
 
-  if (!isSvg && name in (dom as any) && !isBooleanProp(name)) {
-    (dom as any)[name] = (value as any) ?? "";
-  } else if (isBooleanProp(name)) {
-    (dom as any)[name] = !!value;
-    if (!value) dom.removeAttribute(name);
-    else dom.setAttribute(name, "");
+  if (!isSvg && propName in (dom as any) && !isBooleanProp(propName)) {
+    (dom as any)[propName] = (value as any) ?? "";
+  } else if (isBooleanProp(propName)) {
+    (dom as any)[propName] = !!value;
+    if (!value) dom.removeAttribute(propName);
+    else dom.setAttribute(propName, "");
   } else {
-    if (value == null || value === false) dom.removeAttribute(name);
-    else dom.setAttribute(name, value === true ? "" : String(value));
+    if (value == null || value === false) dom.removeAttribute(propName);
+    else dom.setAttribute(propName, value === true ? "" : String(value));
   }
 }
 
@@ -272,7 +366,7 @@ function diffComponent(
   parent: HTMLElement,
   oldVNode: VNode | null,
   newVNode: VNode,
-  inst: HookBag,
+  _inst: HookBag,
   nextSibling: Node | null
 ): Node | null {
   const comp: HookBag = {
@@ -293,7 +387,7 @@ function diffComponent(
     parent,
     oldVNode?._rendered ?? null,
     norm,
-    inst,
+    _inst,
     nextSibling
   );
   (newVNode as any)._rendered = norm;

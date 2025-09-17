@@ -7,6 +7,7 @@ type Props = {
   class?: string;
   ariaLabel?: string; // se informado, vira role="img"
   title?: string; // opcional: <title> para tooltip/leitores de tela
+  color?: string;
 };
 
 export default function Icon({
@@ -15,6 +16,7 @@ export default function Icon({
   class: cls = "",
   ariaLabel,
   title,
+  color,
 }: Props) {
   const d = ICONS[name];
   const px = typeof size === "number" ? String(size) : size;
@@ -29,7 +31,7 @@ export default function Icon({
       role={hasLabel ? "img" : "presentation"}
       aria-label={ariaLabel}
       aria-hidden={hasLabel ? undefined : "true"}
-      fill="currentColor"
+      fill={color ?? "currentColor"}
       focusable="false"
     >
       {title ? <title>{title}</title> : null}

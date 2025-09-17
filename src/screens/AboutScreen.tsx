@@ -5,8 +5,8 @@ export default function AboutScreen() {
   return (
     <section>
       <div class="title-with-icon">
-        <h1>Sobre mim</h1>
-        <Icon name="heart" size={30} class="inline-icon" aria-hidden="true" />
+        <h1 style={{ color: "#4338ca" }}>Sobre mim</h1>
+        <Icon name="heart" size={30} color="#dc2626" aria-hidden="true" />
       </div>
 
       <p>
