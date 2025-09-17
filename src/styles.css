@@ -99,6 +99,19 @@ svg {
   height: auto;
 }
 
+::view-transition-old(page),
+::view-transition-new(page) {
+  animation-duration: 220ms;
+  animation-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page),
+  ::view-transition-new(page) {
+    animation: none;
+  }
+}
+
 .navbar {
   position: sticky;
   top: 0;

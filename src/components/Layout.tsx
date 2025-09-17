@@ -16,7 +16,12 @@ export default function Layout({
   return (
     <div>
       <Navbar currentPath={currentPath} />
-      <main class={`page ${fluid ? "page-fluid" : ""}`}>{children}</main>
+      <main
+        class={`page ${fluid ? "page-fluid" : ""}`}
+        style={{ viewTransitionName: "page" }}
+      >
+        {children}
+      </main>
     </div>
   );
 }

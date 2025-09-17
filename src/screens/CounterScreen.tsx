@@ -1,5 +1,5 @@
 import { h, useState, useEffect } from "../tiny-preact.ts";
-import { hello } from "../utils.ts";
+// import { hello } from "../utils/utils.ts";
 
 export default function CounterScreen() {
   const [n, setN] = useState(0);

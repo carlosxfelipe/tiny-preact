@@ -2,6 +2,7 @@ import "./styles.css";
 import { h, mount, useEffect, useState } from "./tiny-preact.ts";
 import Layout from "./components/Layout.tsx";
 import { HomeScreen, CounterScreen, AboutScreen } from "./screens/index.ts";
+import { attachHashRouter } from "./vt.ts";
 
 type Route = "#/" | "#/counter" | "#/about";
 
@@ -25,16 +26,15 @@ function App() {
   const [route, setRoute] = useState<Route>(getRoute());
 
   useEffect(() => {
-    const onHash = () => setRoute(getRoute());
-    globalThis.addEventListener("hashchange", onHash);
-    return () => globalThis.removeEventListener("hashchange", onHash);
+    const cleanup = attachHashRouter(getRoute, setRoute);
+    return cleanup;
   }, []);
 
   const Screen = ROUTES[route];
 
   return (
     <Layout currentPath={route}>
-      {/* força recriar o sub-árvore quando a rota muda */}
+      {/* força recriar a subárvore quando a rota muda */}
       <Screen key={route} />
     </Layout>
   );
