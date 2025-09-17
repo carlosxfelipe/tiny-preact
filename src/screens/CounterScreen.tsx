@@ -55,8 +55,8 @@ export default function CounterScreen() {
         </button>
       </div>
 
-      <p class="hint">{hello("Carlos")}</p>
       <p class="kbd-hint">atalhos: [+], [−], [0] ou [R]</p>
+      {/* <p class="hint">{hello("Mundo")}</p> */}
     </div>
   );
 }
