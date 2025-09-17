@@ -1,5 +1,11 @@
 # Tiny-preact
 
+https://tiny-preact-demo.netlify.app/
+
+<p align="center">
+  <img src="./preview/tiny-preact-split-50-50.png" alt="Preview do app My Food no modo escuro" width="100%" />
+</p>
+
 Uma mini-lib **React/Preact-like** super simples (`src/tiny-preact.ts`) com `h`, `mount`, `useState`, `useEffect`;
 
 ## Requisitos
