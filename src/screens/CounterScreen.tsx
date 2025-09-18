@@ -1,4 +1,4 @@
-import { h, useState, useEffect } from "../tiny-preact.ts";
+import { h, useState, useEffect } from "../../lib/tiny-preact.ts";
 // import { hello } from "../utils/hello.ts";
 
 export default function CounterScreen() {

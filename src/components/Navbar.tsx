@@ -1,4 +1,4 @@
-import { h } from "../tiny-preact.ts";
+import { h } from "../../lib/tiny-preact.ts";
 
 interface NavbarProps {
   currentPath?: string;

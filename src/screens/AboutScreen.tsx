@@ -1,4 +1,4 @@
-import { h } from "../tiny-preact.ts";
+import { h } from "../../lib/tiny-preact.ts";
 import Icon from "../icons/Icon.tsx";
 
 export default function AboutScreen() {

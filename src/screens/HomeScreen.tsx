@@ -1,4 +1,4 @@
-import { h } from "../tiny-preact.ts";
+import { h } from "../../lib/tiny-preact.ts";
 
 export default function HomeScreen() {
   return (

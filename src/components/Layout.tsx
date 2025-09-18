@@ -1,6 +1,6 @@
-import { h } from "../tiny-preact.ts";
+import { h } from "../../lib/tiny-preact.ts";
 import Navbar from "./Navbar.tsx";
-import type { Child } from "../tiny-preact.ts";
+import type { Child } from "../../lib/tiny-preact.ts";
 
 interface LayoutProps {
   children?: Child[];

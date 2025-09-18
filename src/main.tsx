@@ -1,5 +1,5 @@
 import "./styles.css";
-import { h, mount, useEffect, useState } from "./tiny-preact.ts";
+import { h, mount, useEffect, useState } from "../lib/tiny-preact.ts";
 import Layout from "./components/Layout.tsx";
 import { HomeScreen, CounterScreen, AboutScreen } from "./screens/index.ts";
 import { attachHashRouter } from "./vt.ts";
