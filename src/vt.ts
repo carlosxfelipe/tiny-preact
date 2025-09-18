@@ -15,19 +15,6 @@ export function withViewTransition(updateDom: () => void): void {
   if (typeof doc.startViewTransition === "function") {
     doc.startViewTransition(updateDom);
   } else {
-    updateDom(); // fallback
+    updateDom();
   }
-}
-
-export function attachHashRouter<T>(
-  getRoute: () => T,
-  setRoute: (r: T) => void
-): () => void {
-  const onHash = () => {
-    const next = getRoute();
-    withViewTransition(() => setRoute(next));
-  };
-
-  globalThis.addEventListener("hashchange", onHash);
-  return () => globalThis.removeEventListener("hashchange", onHash);
 }
