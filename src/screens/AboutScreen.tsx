@@ -24,7 +24,7 @@ export default function AboutScreen() {
         }}
       >
         <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Icon name="heart-outline" size={20} aria-hidden="true" />
+          <Icon name="email-variant" size={20} aria-hidden="true" />
           <span>
             Email:{" "}
             <a href="mailto:carlosxfelipe@gmail.com">carlosxfelipe@gmail.com</a>
@@ -32,7 +32,7 @@ export default function AboutScreen() {
         </li>
 
         <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Icon name="star-outline" size={20} aria-hidden="true" />
+          <Icon name="github" size={20} aria-hidden="true" />
           <span>
             GitHub:{" "}
             <a
@@ -46,7 +46,7 @@ export default function AboutScreen() {
         </li>
 
         <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Icon name="account-outline" size={20} aria-hidden="true" />
+          <Icon name="linkedin" size={20} aria-hidden="true" />
           <span>
             LinkedIn:{" "}
             <a
