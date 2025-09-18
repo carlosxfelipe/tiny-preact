@@ -1,4 +1,5 @@
 import { h, useState, useEffect } from "../../lib/tiny-preact.ts";
+import Icon from "../icons/Icon.tsx";
 // import { hello } from "../utils/hello.ts";
 
 export default function CounterScreen() {
@@ -35,7 +36,7 @@ export default function CounterScreen() {
           aria-label="Subtrair 1"
           onClick={() => setN(n - 1)}
         >
-          −1
+          <Icon name="minus" size={20} ariaLabel="menos" />
         </button>
         <button
           type="button"
@@ -43,7 +44,7 @@ export default function CounterScreen() {
           aria-label="Adicionar 1"
           onClick={() => setN(n + 1)}
         >
-          +1
+          <Icon name="plus" size={20} ariaLabel="mais" />
         </button>
         <button
           type="button"

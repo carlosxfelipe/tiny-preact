@@ -11,10 +11,10 @@ function App() {
     return cleanup;
   }, []);
 
-  const Screen = ROUTES[route];
+  const { component: Screen, layout } = ROUTES[route];
 
   return (
-    <Layout currentPath={route}>
+    <Layout currentPath={route} fluid={layout?.fluid ?? false}>
       <Screen key={route} />
     </Layout>
   );

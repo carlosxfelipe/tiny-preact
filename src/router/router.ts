@@ -4,10 +4,37 @@ import { HomeScreen, CounterScreen, AboutScreen } from "../screens/index.ts";
 export type Route = "#/" | "#/counter" | "#/about";
 type ScreenCmp = () => JSX.Element;
 
-export const ROUTES: Record<Route, ScreenCmp> = {
-  "#/": HomeScreen as ScreenCmp,
-  "#/counter": CounterScreen as ScreenCmp,
-  "#/about": AboutScreen as ScreenCmp,
+/**
+ * Layout options
+ *
+ * `fluid` controls how wide the <main> content area should be:
+ *
+ * - fluid: false (default) → content is centered and constrained
+ *   (max-width: 1024px, better for text-heavy or static pages).
+ *
+ * - fluid: true → content stretches to use the full viewport width
+ *   (max-width: none, better for dashboards, counters, tables).
+ *
+ * Example:
+ * "#/counter" uses `fluid: true` so it expands,
+ * while "#/" and "#/about" stay in a centered layout.
+ */
+export const ROUTES: Record<
+  Route,
+  { component: ScreenCmp; layout?: { fluid?: boolean } }
+> = {
+  "#/": {
+    component: HomeScreen,
+    layout: { fluid: false },
+  },
+  "#/counter": {
+    component: CounterScreen,
+    layout: { fluid: false },
+  },
+  "#/about": {
+    component: AboutScreen,
+    layout: { fluid: false },
+  },
 };
 
 export function getRoute(): Route {
