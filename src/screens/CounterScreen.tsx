@@ -1,5 +1,5 @@
 import { h, useState, useEffect } from "../tiny-preact.ts";
-// import { hello } from "../utils/utils.ts";
+import { hello } from "../utils/hello.ts";
 
 export default function CounterScreen() {
   const [n, setN] = useState(0);
@@ -56,7 +56,7 @@ export default function CounterScreen() {
       </div>
 
       <p class="kbd-hint">atalhos: [+], [−], [0] ou [R]</p>
-      {/* <p class="hint">{hello("Mundo")}</p> */}
+      <p class="hint">{hello("Mundo")}</p>
     </div>
   );
 }
