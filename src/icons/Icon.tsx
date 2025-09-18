@@ -5,8 +5,8 @@ type Props = {
   name: IconName;
   size?: number | string;
   class?: string;
-  ariaLabel?: string; // se informado, vira role="img"
-  title?: string; // opcional: <title> para tooltip/leitores de tela
+  ariaLabel?: string; // if provided, role="img" will be applied
+  title?: string; // optional: <title> for tooltip/screen readers
   color?: string;
 };
 
