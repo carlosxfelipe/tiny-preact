@@ -182,18 +182,6 @@ svg {
   border-color: var(--primary);
 }
 
-.page {
-  width: min(100%, 1024px);
-  margin: 0 auto;
-  padding: 24px 16px 32px;
-  padding-top: calc(24px + env(safe-area-inset-top));
-}
-
-.page-fluid {
-  width: 100%;
-  max-width: none;
-}
-
 .page a {
   color: var(--primary);
   text-decoration: none;
@@ -304,10 +292,6 @@ svg {
   .button {
     min-height: 44px;
     padding: 10px 14px;
-  }
-  .page {
-    padding-left: 14px;
-    padding-right: 14px;
   }
 }
 
