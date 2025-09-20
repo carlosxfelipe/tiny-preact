@@ -15,26 +15,9 @@ Uma mini-lib **React/Preact-like** super simples (`tiny-preact.ts`) com `h`, `mo
 ## Começo rápido
 
 ```bash
-# 1) Gerar os artefatos de produção em dist/
-deno task bundle
-
-# 2) Servir os arquivos gerados
-deno task serve
-
-# 3) Abrir no navegador
-# http://localhost:8000
+deno task start
+# abre http://localhost:8000
 ```
-
-### O que acontece no bundle?
-
-- O Deno lê `src/index.html`, resolve o `<script type="module" src="./main.tsx">` e seus imports (incluindo TS/CSS);
-- Emite os arquivos em `dist/` e reescreve o HTML de saída para apontar para eles;
-- Fica pronto para servir em produção (edge/CDN/estático).
-
-### Scripts (deno.json)
-
-- `deno task bundle` — realiza o bundle com `src/index.html` como entrypoint.
-- `deno task serve` — serve o diretório `dist/` em `http://localhost:8000`.
 
 ## JSX (opcional)
 

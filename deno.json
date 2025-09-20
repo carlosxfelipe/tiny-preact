@@ -1,7 +1,9 @@
 {
   "tasks": {
     "serve": "deno run --allow-read --allow-net -q server.ts",
-    "bundle": "deno bundle --outdir dist src/index.html"
+    "bundle": "deno bundle --outdir dist src/index.html",
+    "clean": "rm -rf dist",
+    "start": "deno task clean && deno task bundle && deno task serve"
   },
   "compilerOptions": {
     "jsx": "react",
