@@ -108,7 +108,7 @@ svg {
 
 .link:hover {
   color: var(--primary-hover);
-  text-decoration: underline;
+  /* text-decoration: underline; */
   text-decoration-color: var(--primary-hover);
 }
 
