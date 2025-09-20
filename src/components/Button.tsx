@@ -1,5 +1,5 @@
-import { h, useState } from "../../lib/tiny-preact.ts";
-import { StyleSheet } from "../styles/stylesheet.ts";
+import { h, useState } from "@lib/tiny-preact.ts";
+import { StyleSheet } from "@styles/stylesheet.ts";
 
 type Variant = "default" | "primary" | "danger";
 
