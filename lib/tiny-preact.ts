@@ -19,6 +19,11 @@ export interface VNode {
   _hooks?: HookBag | null;
 }
 
+interface TextVNode extends VNode {
+  type: typeof TEXT;
+  props: { nodeValue: string };
+}
+
 type HookEffect = { i: number; effect: () => void | (() => void) };
 
 interface HookBag {
@@ -56,7 +61,7 @@ function normalize(node: Child): VNode | null {
     type: TEXT,
     props: { nodeValue: String(node) },
     children: [],
-  } as VNode;
+  } as TextVNode;
 }
 
 const TEXT = Symbol("text");
@@ -230,9 +235,12 @@ function diff(
         : document.createTextNode("");
     if (!oldVNode || dom.parentNode !== parent)
       parent.insertBefore(dom, nextSibling);
-    if (dom.nodeValue !== (newVNode.props as any).nodeValue) {
-      dom.nodeValue = (newVNode.props as any).nodeValue;
+
+    const text = (newVNode as TextVNode).props.nodeValue;
+    if (dom.nodeValue !== text) {
+      dom.nodeValue = text;
     }
+
     newVNode.__dom = dom;
     return dom;
   }
@@ -343,11 +351,13 @@ function isBooleanProp(name: string) {
 function updateProps(dom: Element, prev: Props, next: Props) {
   // Remove
   for (const k in prev) {
-    if (!(k in next)) setProp(dom, k, null, prev[k]);
+    if (!(k in next))
+      setProp(dom, k, null, (prev as Record<string, unknown>)[k]);
   }
   // Add/update
   for (const k in next) {
-    if (prev[k] !== next[k]) setProp(dom, k, next[k], prev[k]);
+    if ((prev as Record<string, unknown>)[k] !== next[k])
+      setProp(dom, k, next[k], (prev as Record<string, unknown>)[k]);
   }
 }
 
@@ -451,10 +461,10 @@ function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
 
   // Refs: callback or { current }
   if (propName === "ref") {
-    const cb = value as unknown;
+    const cb = value;
     if (typeof cb === "function") (cb as (el: Element | null) => void)(dom);
     else if (cb && typeof cb === "object")
-      (cb as { current: any }).current = dom;
+      (cb as { current: Element | null }).current = dom;
     return;
   }
 
@@ -464,7 +474,7 @@ function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
     value &&
     typeof value === "object"
   ) {
-    const html = (value as any).__html ?? "";
+    const html = (value as { __html?: string }).__html ?? "";
     (dom as HTMLElement).innerHTML = String(html);
     return;
   }
@@ -488,10 +498,10 @@ function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
   const el = dom as HTMLElement & Record<string, unknown>;
 
   if (!isSvg && propName in el && !isBooleanProp(propName)) {
-    el[propName] =
+    (el as Record<string, unknown>)[propName] =
       (value as string | number | boolean | null | undefined) ?? "";
   } else if (isBooleanProp(propName)) {
-    (el as any)[propName] = !!value;
+    (el as unknown as Record<string, boolean>)[propName] = !!value;
     if (!value) dom.removeAttribute(propName);
     else dom.setAttribute(propName, "");
   } else {
@@ -523,7 +533,7 @@ function diffComponent(
   });
   CURRENT = null;
   comp.hookIndex = 0;
-  const norm = normalize(rendered as any);
+  const norm = normalize(rendered as Child);
   const dom = diff(
     parent,
     oldVNode?._rendered ?? null,
@@ -544,9 +554,10 @@ export function useState<S>(
   const comp = CURRENT;
   if (!comp) throw new Error("useState must be called inside a component");
   const i = comp.hookIndex++;
-  if (comp.hooks[i] === undefined)
+  if (comp.hooks[i] === undefined) {
     comp.hooks[i] =
       typeof initial === "function" ? (initial as () => S)() : initial;
+  }
   const setState = (v: S | ((prev: S) => S)) => {
     const next =
       typeof v === "function" ? (v as (p: S) => S)(comp.hooks[i] as S) : v;
@@ -594,12 +605,12 @@ function scheduleFlush() {
       const stack: (VNode | null)[] = [vnode];
       while (stack.length) {
         const v = stack.pop();
-        if (v?._hooks?.__needsFlush) {
+        if (v?._hooks?.__needsFlush && v._hooks) {
           v._hooks.__needsFlush = false;
           for (const e of v._hooks.effects) {
             if (v._hooks.effectCleanups[e.i]) {
               try {
-                v._hooks.effectCleanups[e.i]!();
+                v._hooks.effectCleanups[e.i]!(/* cleanup */);
               } catch {}
             }
             try {
