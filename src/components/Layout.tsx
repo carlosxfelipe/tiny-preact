@@ -4,7 +4,7 @@ import Navbar from "@components/Navbar.tsx";
 import { StyleSheet } from "@styles/stylesheet.ts";
 
 interface LayoutProps {
-  children?: Child[];
+  children?: Child | Child[];
   fluid?: boolean;
   currentPath?: string;
 }

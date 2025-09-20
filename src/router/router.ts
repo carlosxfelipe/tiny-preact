@@ -1,5 +1,5 @@
-import { withViewTransition } from "../vt.ts";
-import { HomeScreen, CounterScreen, AboutScreen } from "../screens/index.ts";
+import { withViewTransition } from "@src/vt.ts";
+import { HomeScreen, CounterScreen, AboutScreen } from "@screens/index.ts";
 
 export type Route = "#/" | "#/counter" | "#/about";
 type ScreenCmp = () => JSX.Element;

@@ -1,5 +1,5 @@
-import { h } from "../../lib/tiny-preact.ts";
-import { ICONS, type IconName } from "../icons/paths.ts";
+import { h } from "@lib/tiny-preact.ts";
+import { ICONS, type IconName } from "@icons/paths.ts";
 
 type Props = {
   name: IconName;

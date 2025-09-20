@@ -1,8 +1,8 @@
-import { h, useState, useEffect } from "../../lib/tiny-preact.ts";
-import Icon from "../icons/Icon.tsx";
-import Button from "../components/Button.tsx";
-import { StyleSheet } from "../styles/stylesheet.ts";
-// import { hello } from "../utils/hello.ts";
+import { h, useState, useEffect } from "@lib/tiny-preact.ts";
+import Icon from "@icons/Icon.tsx";
+import Button from "@components/Button.tsx";
+import { StyleSheet } from "@styles/stylesheet.ts";
+// import { hello } from "@utils/hello.ts";
 
 export default function CounterScreen() {
   const [n, setN] = useState(0);

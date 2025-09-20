@@ -1,6 +1,6 @@
-import { h } from "../../lib/tiny-preact.ts";
-import Icon from "../icons/Icon.tsx";
-import { StyleSheet } from "../styles/stylesheet.ts";
+import { h } from "@lib/tiny-preact.ts";
+import Icon from "@icons/Icon.tsx";
+import { StyleSheet } from "@styles/stylesheet.ts";
 
 export default function AboutScreen() {
   return (
@@ -20,7 +20,9 @@ export default function AboutScreen() {
           <Icon name="email-variant" size={20} aria-hidden="true" />
           <span>
             Email:{" "}
-            <a href="mailto:carlosxfelipe@gmail.com">carlosxfelipe@gmail.com</a>
+            <a href="mailto:carlosxfelipe@gmail.com" class="link">
+              carlosxfelipe@gmail.com
+            </a>
           </span>
         </li>
 
@@ -32,6 +34,7 @@ export default function AboutScreen() {
               href="https://github.com/carlosxfelipe"
               target="_blank"
               rel="noreferrer"
+              class="link"
             >
               github.com/carlosxfelipe
             </a>
@@ -46,6 +49,7 @@ export default function AboutScreen() {
               href="https://linkedin.com/in/carlosxfelipe"
               target="_blank"
               rel="noreferrer"
+              class="link"
             >
               linkedin.com/in/carlosxfelipe
             </a>
@@ -56,7 +60,9 @@ export default function AboutScreen() {
           <Icon name="map-marker-outline" size={20} aria-hidden="true" />
           <span>
             Fortaleza, Ceará, Brasil •{" "}
-            <a href="tel:+5585999502195">(85) 99950-2195</a>
+            <a href="tel:+5585999502195" class="link">
+              (85) 99950-2195
+            </a>
           </span>
         </li>
       </ul>

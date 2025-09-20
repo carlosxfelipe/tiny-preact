@@ -99,6 +99,25 @@ svg {
   height: auto;
 }
 
+.link {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+  text-decoration-color: var(--primary-hover);
+}
+
+.link:focus {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: 2px;
+}
+
 ::view-transition-old(page),
 ::view-transition-new(page) {
   animation-duration: 220ms;

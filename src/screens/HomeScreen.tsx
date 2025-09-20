@@ -1,4 +1,4 @@
-import { h } from "../../lib/tiny-preact.ts";
+import { h } from "@lib/tiny-preact.ts";
 
 export default function HomeScreen() {
   return (
@@ -26,6 +26,7 @@ export default function HomeScreen() {
           href="https://github.com/carlosxfelipe/tiny-preact"
           target="_blank"
           rel="noopener noreferrer"
+          class="link"
         >
           GitHub
         </a>

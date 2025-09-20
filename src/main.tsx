@@ -1,7 +1,12 @@
-import "./styles/styles.css";
-import { h, mount, useEffect, useState } from "../lib/tiny-preact.ts";
-import Layout from "./components/Layout.tsx";
-import { ROUTES, getRoute, attachRouter, type Route } from "./router/router.ts";
+import "@styles/styles.css";
+import { h, mount, useEffect, useState } from "@lib/tiny-preact.ts";
+import Layout from "@components/Layout.tsx";
+import {
+  ROUTES,
+  getRoute,
+  attachRouter,
+  type Route,
+} from "@src/router/router.ts";
 
 function App() {
   const [route, setRoute] = useState<Route>(getRoute());
