@@ -1,5 +1,6 @@
 import { h, useState, useEffect } from "../../lib/tiny-preact.ts";
 import Icon from "../icons/Icon.tsx";
+import Button from "../components/Button.tsx";
 import { StyleSheet } from "../styles/stylesheet.ts";
 // import { hello } from "../utils/hello.ts";
 
@@ -9,8 +10,8 @@ export default function CounterScreen() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = e.key;
-      if (k === "+" || k === "=") setN((v: number) => v + 1);
-      else if (k === "-" || k === "_") setN((v: number) => v - 1);
+      if (k === "+" || k === "=") setN((v) => v + 1);
+      else if (k === "-" || k === "_") setN((v) => v - 1);
       else if (k === "0" || k.toLowerCase() === "r") setN(0);
     };
     document.addEventListener("keydown", onKey);
@@ -19,42 +20,25 @@ export default function CounterScreen() {
 
   return (
     <div style={styles.card}>
-      <h2 class="title">Contador</h2>
-      <div
-        class="value"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        title={`Valor atual: ${n}`}
-      >
+      <h2 style={styles.title}>Contador</h2>
+      <div style={styles.value} role="status">
         {n}
       </div>
 
       <div style={styles.controls}>
-        <button
-          type="button"
-          class="button"
-          aria-label="Subtrair 1"
-          onClick={() => setN(n - 1)}
-        >
+        <Button ariaLabel="Subtrair 1" onClick={() => setN(n - 1)}>
           <Icon name="minus" size={20} ariaLabel="menos" />
-        </button>
-        <button
-          type="button"
-          class="button primary"
-          aria-label="Adicionar 1"
+        </Button>
+        <Button
+          ariaLabel="Adicionar 1"
+          variant="primary"
           onClick={() => setN(n + 1)}
         >
           <Icon name="plus" size={20} ariaLabel="mais" />
-        </button>
-        <button
-          type="button"
-          class="button danger"
-          aria-label="Resetar"
-          onClick={() => setN(0)}
-        >
+        </Button>
+        <Button ariaLabel="Resetar" variant="danger" onClick={() => setN(0)}>
           reset
-        </button>
+        </Button>
       </div>
 
       <p style={styles.kbdHint}>atalhos: [+], [−], [0] ou [R]</p>
@@ -73,6 +57,21 @@ const styles = StyleSheet.create({
     background: "var(--card-bg)",
     margin: "0 auto",
     textAlign: "center",
+  },
+  title: {
+    margin: "0 0 8px",
+    fontSize: 18,
+    color: "var(--muted)",
+    fontWeight: 600,
+    letterSpacing: "0.2px",
+  },
+  value: {
+    fontSize: "clamp(48px, 9vw, 80px)",
+    fontWeight: 800,
+    lineHeight: 1,
+    margin: "8px 0 18px",
+    letterSpacing: "-0.02em",
+    fontVariantNumeric: "tabular-nums",
   },
   controls: {
     display: "flex",
