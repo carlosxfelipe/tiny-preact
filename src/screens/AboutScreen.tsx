@@ -1,5 +1,6 @@
 import { h } from "../../lib/tiny-preact.ts";
 import Icon from "../icons/Icon.tsx";
+import { StyleSheet } from "../styles/stylesheet.ts";
 
 export default function AboutScreen() {
   return (
@@ -14,16 +15,8 @@ export default function AboutScreen() {
       </p>
 
       <h2>Contato</h2>
-      <ul
-        style={{
-          listStyle: "none",
-          padding: 0,
-          margin: 0,
-          display: "grid",
-          gap: 8,
-        }}
-      >
-        <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <ul style={styles.list}>
+        <li style={styles.item}>
           <Icon name="email-variant" size={20} aria-hidden="true" />
           <span>
             Email:{" "}
@@ -31,7 +24,7 @@ export default function AboutScreen() {
           </span>
         </li>
 
-        <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <li style={styles.item}>
           <Icon name="github" size={20} aria-hidden="true" />
           <span>
             GitHub:{" "}
@@ -45,7 +38,7 @@ export default function AboutScreen() {
           </span>
         </li>
 
-        <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <li style={styles.item}>
           <Icon name="linkedin" size={20} aria-hidden="true" />
           <span>
             LinkedIn:{" "}
@@ -59,7 +52,7 @@ export default function AboutScreen() {
           </span>
         </li>
 
-        <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <li style={styles.item}>
           <Icon name="map-marker-outline" size={20} aria-hidden="true" />
           <span>
             Fortaleza, Ceará, Brasil •{" "}
@@ -70,3 +63,18 @@ export default function AboutScreen() {
     </section>
   );
 }
+
+const styles = StyleSheet.create({
+  list: {
+    listStyle: "none",
+    padding: 0,
+    margin: 0,
+    display: "grid",
+    gap: 8,
+  },
+  item: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  },
+});

@@ -1,4 +1,4 @@
-import "./styles.css";
+import "./styles/styles.css";
 import { h, mount, useEffect, useState } from "../lib/tiny-preact.ts";
 import Layout from "./components/Layout.tsx";
 import { ROUTES, getRoute, attachRouter, type Route } from "./router/router.ts";

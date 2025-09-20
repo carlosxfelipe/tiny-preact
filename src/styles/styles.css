@@ -264,16 +264,6 @@ svg {
   border-color: var(--danger-hover);
 }
 
-.card {
-  width: min(520px, 92vw);
-  padding: 28px;
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  background: var(--card-bg);
-  margin: 0 auto;
-}
-
 .title {
   margin: 0 0 8px;
   font-size: 18px;
@@ -289,25 +279,6 @@ svg {
   margin: 8px 0 18px;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-}
-
-.controls {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.hint {
-  margin: 8px 0 0;
-  color: var(--muted);
-}
-
-.kbd-hint {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: var(--muted);
-  opacity: 0.9;
 }
 
 @media (max-width: 640px) {
@@ -333,14 +304,6 @@ svg {
   .button {
     min-height: 44px;
     padding: 10px 14px;
-  }
-  .card {
-    width: min(520px, 94vw);
-    padding: 22px;
-  }
-  .controls {
-    flex-wrap: wrap;
-    row-gap: 8px;
   }
   .page {
     padding-left: 14px;

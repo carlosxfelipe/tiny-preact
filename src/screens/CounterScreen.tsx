@@ -1,5 +1,6 @@
 import { h, useState, useEffect } from "../../lib/tiny-preact.ts";
 import Icon from "../icons/Icon.tsx";
+import { StyleSheet } from "../styles/stylesheet.ts";
 // import { hello } from "../utils/hello.ts";
 
 export default function CounterScreen() {
@@ -17,7 +18,7 @@ export default function CounterScreen() {
   }, []);
 
   return (
-    <div class="card" style={{ textAlign: "center" }}>
+    <div style={styles.card}>
       <h2 class="title">Contador</h2>
       <div
         class="value"
@@ -29,7 +30,7 @@ export default function CounterScreen() {
         {n}
       </div>
 
-      <div class="controls">
+      <div style={styles.controls}>
         <button
           type="button"
           class="button"
@@ -56,8 +57,33 @@ export default function CounterScreen() {
         </button>
       </div>
 
-      <p class="kbd-hint">atalhos: [+], [−], [0] ou [R]</p>
-      {/* <p class="hint">{hello("Mundo")}</p> */}
+      <p style={styles.kbdHint}>atalhos: [+], [−], [0] ou [R]</p>
+      {/* <p>{hello("Mundo")}</p> */}
     </div>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    width: "min(520px, 92vw)",
+    padding: 28,
+    border: "1px solid var(--card-border)",
+    borderRadius: 16,
+    boxShadow: "var(--shadow)",
+    background: "var(--card-bg)",
+    margin: "0 auto",
+    textAlign: "center",
+  },
+  controls: {
+    display: "flex",
+    gap: 12,
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  kbdHint: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "var(--muted)",
+    opacity: 0.9,
+  },
+});
