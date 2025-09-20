@@ -6,7 +6,7 @@ https://tiny-preact-demo.netlify.app/
   <img src="./preview/tiny-preact-split-50-50.png" alt="Preview do app My Food no modo escuro" width="100%" />
 </p>
 
-Uma mini-lib **React/Preact-like** super simples (`src/tiny-preact.ts`) com `h`, `mount`, `useState`, `useEffect`;
+Uma mini-lib **React/Preact-like** super simples (`tiny-preact.ts`) com `h`, `mount`, `useState`, `useEffect`, `Fragment`;
 
 ## Requisitos
 
@@ -49,23 +49,17 @@ O projeto está configurado com **JSX clássico** e `jsxFactory: "h"` no `deno.j
 
 Também é possível escrever **sem JSX**, usando `h("div", ...)`.
 
-> Observação: **Fragmentos** (`<>...</>`) não são suportados nesta lib mínima; use um elemento contêiner.
-
-## tiny-preact (mini-lib)
-
-Arquivo: `src/tiny-preact.ts`
-
-Recursos:
+## Recursos
 
 - `h(type, props, ...children)` — cria VNodes (suporta objetos `style`, atributos, e eventos via `onClick`, etc.).
 - `mount(vnode, container)` / `render(vnode, container)` — renderer com diff básico **com suporte a keys** (reconciliação chaveada).
 - Hooks: `useState`, `useEffect` (efeitos executados em **microtask** logo após o commit; *não garante pós-paint*).
+- `Fragment`: suporte a múltiplos nós adjacentes.
 
 Tipos:
 
 - `JSX.Element` é mapeado para `VNode` via `src/jsx.d.ts`.
-- `JSX.IntrinsicElements` é aberto como um índice (`Record<string, unknown>`) para permitir tags HTML.
-
+- `JSX.IntrinsicElements` é aberto como um índice (`Record<string, unknown>`) para permitir tags HTML e atributos comuns.
 
 ## Produção
 
@@ -74,8 +68,7 @@ Tipos:
 
 ## Licença
 
-Este projeto é licenciado sob os termos da **GNU General Public License v3.0 or
-later**.
+Este projeto é licenciado sob os termos da **GNU General Public License v3.0 or later**.
 
 Você pode acessar a licença diretamente [aqui](https://www.gnu.org/licenses/gpl-3.0.txt).
 

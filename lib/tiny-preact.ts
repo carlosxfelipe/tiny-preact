@@ -1,7 +1,7 @@
 // tiny-preact.ts — a tiny React/Preact-like library in one file (TypeScript)
 // Features: h() (createElement), render()/mount(), basic diffing, and useState/useEffect for function components.
 // No dependencies. Requires DOM APIs (document/HTMLElement): works in browsers, Deno with DOM enabled, and via CDNs.
-// JSX supported in “classic” mode via `@jsx h` or `compilerOptions.jsxFactory: "h"`. Fragment shorthand (`<>...</>`) is not supported.
+// JSX supported in “classic” mode via `@jsx h` or `compilerOptions.jsxFactory: "h"`.
 
 // --- Types ------------------------------------------------------------------
 export type Props = Record<string, unknown> & { children?: unknown };
@@ -11,7 +11,7 @@ export type FC<P = Record<string, unknown>> = (
 ) => VNode | Child;
 
 export interface VNode {
-  type: string | typeof TEXT | FC<unknown>;
+  type: string | typeof TEXT | typeof Fragment | FC<unknown>;
   props: Props;
   children: (VNode | null)[];
   __dom?: Node | null;
@@ -60,6 +60,7 @@ function normalize(node: Child): VNode | null {
 }
 
 const TEXT = Symbol("text");
+export const Fragment = Symbol("fragment");
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 // Keyed reconciliation helpers
@@ -69,6 +70,25 @@ function getKey(v: VNode | null): unknown {
 function isSameType(a: VNode | null, b: VNode | null): boolean {
   if (!a || !b) return false;
   return a.type === b.type;
+}
+
+// --- Unmount & cleanup ------------------------------------------------------
+function unmount(v: VNode | null) {
+  if (!v) return;
+  // unmount subtree first
+  if (v._rendered) unmount(v._rendered);
+  for (const c of v.children) if (c) unmount(c);
+
+  // run effect cleanups
+  const hooks = v._hooks;
+  if (hooks && hooks.effectCleanups) {
+    for (const cl of hooks.effectCleanups) {
+      try {
+        cl?.();
+      } catch {}
+    }
+    hooks.effectCleanups = [];
+  }
 }
 
 // --- Renderer ---------------------------------------------------------------
@@ -99,8 +119,15 @@ function diff(
   nextSibling: Node | null = null
 ): Node | null {
   if (oldVNode === newVNode) return oldVNode?.__dom ?? null;
+
+  // Remove
   if (newVNode == null) {
-    if (oldVNode?.__dom) parent.removeChild(oldVNode.__dom);
+    if (oldVNode) {
+      unmount(oldVNode);
+      if (oldVNode.__dom && oldVNode.__dom.parentNode === parent) {
+        parent.removeChild(oldVNode.__dom);
+      }
+    }
     return null;
   }
 
@@ -115,14 +142,94 @@ function diff(
     );
   }
 
+  // Fragment (no wrapper element; children go directly into parent)
+  if (newVNode.type === Fragment) {
+    // We'll reconcile children directly under `parent`
+    const oldKidsAll = (oldVNode?.children || []) as (VNode | null)[];
+    const newKidsAll = (newVNode.children || []) as (VNode | null)[];
+
+    const oldKids = oldKidsAll.filter(Boolean) as VNode[];
+    const newKids = newKidsAll.filter(Boolean) as VNode[];
+
+    const oldKeyed = new Map<unknown, VNode>();
+    const oldUnkeyed: VNode[] = [];
+    for (const k of oldKids) {
+      const key = getKey(k);
+      if (key != null) oldKeyed.set(key, k);
+      else oldUnkeyed.push(k);
+    }
+
+    let prevDom: Node | null = null;
+
+    for (let i = 0; i < newKids.length; i++) {
+      const newK = newKids[i];
+      const newKey = getKey(newK);
+
+      let match: VNode | null = null;
+
+      if (newKey != null) {
+        match = oldKeyed.get(newKey) || null;
+        if (match) oldKeyed.delete(newKey);
+      } else {
+        let idx = -1;
+        for (let j = 0; j < oldUnkeyed.length; j++) {
+          if (isSameType(oldUnkeyed[j], newK)) {
+            idx = j;
+            break;
+          }
+        }
+        if (idx === -1 && oldUnkeyed.length) idx = 0;
+        if (idx !== -1) match = oldUnkeyed.splice(idx, 1)[0];
+      }
+
+      const childDom = diff(parent, match, newK, inst, null);
+      if (childDom) {
+        const containerEl = parent as Element;
+        const needsMove =
+          childDom !== prevDom &&
+          (childDom.parentNode !== containerEl ||
+            childDom.previousSibling !== prevDom);
+        if (needsMove) {
+          containerEl.insertBefore(
+            childDom,
+            prevDom ? prevDom.nextSibling : containerEl.firstChild
+          );
+        }
+        prevDom = childDom;
+      }
+    }
+
+    for (const leftover of oldKeyed.values()) {
+      unmount(leftover);
+      if (leftover.__dom && leftover.__dom.parentNode === parent) {
+        (parent as Element).removeChild(leftover.__dom);
+      }
+    }
+    for (const leftover of oldUnkeyed) {
+      unmount(leftover);
+      if (leftover.__dom && leftover.__dom.parentNode === parent) {
+        (parent as Element).removeChild(leftover.__dom);
+      }
+    }
+
+    newVNode.__dom = oldVNode?.__dom ?? null; // not meaningful for fragments
+    return prevDom;
+  }
+
   // Text node
   if (newVNode.type === TEXT) {
     const oldIsText = oldVNode?.type === TEXT;
+    // If we are replacing a non-text node that was matched (e.g., same key), remove it first:
+    if (!oldIsText && oldVNode?.__dom && oldVNode.__dom.parentNode === parent) {
+      unmount(oldVNode);
+      parent.removeChild(oldVNode.__dom);
+    }
     const dom =
       oldIsText && oldVNode?.__dom instanceof Text
         ? (oldVNode.__dom as Text)
         : document.createTextNode("");
-    if (!oldVNode) parent.insertBefore(dom, nextSibling);
+    if (!oldVNode || dom.parentNode !== parent)
+      parent.insertBefore(dom, nextSibling);
     if (dom.nodeValue !== (newVNode.props as any).nodeValue) {
       dom.nodeValue = (newVNode.props as any).nodeValue;
     }
@@ -136,6 +243,11 @@ function diff(
   if (sameType && oldVNode?.__dom) {
     dom = oldVNode.__dom as Element;
   } else {
+    // If we matched an old node (e.g., by key) but the type changed, remove the old one first
+    if (!sameType && oldVNode?.__dom && oldVNode.__dom.parentNode === parent) {
+      unmount(oldVNode);
+      parent.removeChild(oldVNode.__dom);
+    }
     const tag = String(newVNode.type);
     const isSvgContext = parent instanceof SVGElement || tag === "svg";
     dom = isSvgContext
@@ -194,7 +306,8 @@ function diff(
 
     if (childDom) {
       const needsMove =
-        childDom !== prevDom && childDom.previousSibling !== prevDom;
+        childDom !== prevDom &&
+        (childDom.parentNode !== dom || childDom.previousSibling !== prevDom);
       if (needsMove) {
         (dom as Element).insertBefore(
           childDom,
@@ -206,9 +319,11 @@ function diff(
   }
 
   for (const leftover of oldKeyed.values()) {
+    unmount(leftover);
     if (leftover.__dom) (dom as Element).removeChild(leftover.__dom);
   }
   for (const leftover of oldUnkeyed) {
+    unmount(leftover);
     if (leftover.__dom) (dom as Element).removeChild(leftover.__dom);
   }
 
@@ -332,8 +447,27 @@ function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
   // Alias: allow React-style "className"
   const propName = name === "className" ? "class" : name;
 
-  if (propName === "children" || propName === "key" || propName === "ref")
-    return; // "key"/"ref" unsupported
+  if (propName === "children" || propName === "key") return;
+
+  // Refs: callback or { current }
+  if (propName === "ref") {
+    const cb = value as unknown;
+    if (typeof cb === "function") (cb as (el: Element | null) => void)(dom);
+    else if (cb && typeof cb === "object")
+      (cb as { current: any }).current = dom;
+    return;
+  }
+
+  // dangerouslySetInnerHTML
+  if (
+    propName === "dangerouslySetInnerHTML" &&
+    value &&
+    typeof value === "object"
+  ) {
+    const html = (value as any).__html ?? "";
+    (dom as HTMLElement).innerHTML = String(html);
+    return;
+  }
 
   if (isEventProp(propName)) {
     const ev = toEventName(propName);
@@ -517,5 +651,5 @@ function cloneVNode(v: VNode | null): VNode | null {
 }
 
 // Default export for convenience
-const tiny = { h, render, mount, useState, useEffect };
+const tiny = { h, render, mount, useState, useEffect, Fragment };
 export default tiny;
