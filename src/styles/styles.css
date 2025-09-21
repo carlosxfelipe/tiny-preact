@@ -131,6 +131,18 @@ svg {
   }
 }
 
+[data-tp-transition-scope="page"][data-tp-vt-old],
+[data-tp-transition-scope="page"][data-tp-vt-new] {
+  transition: opacity 220ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tp-transition-scope][data-tp-vt-old],
+  [data-tp-transition-scope][data-tp-vt-new] {
+    transition: none;
+  }
+}
+
 .navbar {
   position: sticky;
   top: 0;
