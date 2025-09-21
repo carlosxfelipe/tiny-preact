@@ -11,7 +11,7 @@ export type FC<P = Record<string, unknown>> = (
 ) => VNode | Child;
 
 export interface VNode {
-  type: string | typeof TEXT | typeof Fragment | FC<unknown>;
+  type: string | typeof TEXT | FC<unknown>;
   props: Props;
   children: (VNode | null)[];
   __dom?: Node | null;
@@ -65,7 +65,6 @@ function normalize(node: Child): VNode | null {
 }
 
 const TEXT = Symbol("text");
-export const Fragment = Symbol("fragment");
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 // Keyed reconciliation helpers
@@ -145,80 +144,6 @@ function diff(
       inst,
       nextSibling
     );
-  }
-
-  // Fragment (no wrapper element; children go directly into parent)
-  if (newVNode.type === Fragment) {
-    // We'll reconcile children directly under `parent`
-    const oldKidsAll = (oldVNode?.children || []) as (VNode | null)[];
-    const newKidsAll = (newVNode.children || []) as (VNode | null)[];
-
-    const oldKids = oldKidsAll.filter(Boolean) as VNode[];
-    const newKids = newKidsAll.filter(Boolean) as VNode[];
-
-    const oldKeyed = new Map<unknown, VNode>();
-    const oldUnkeyed: VNode[] = [];
-    for (const k of oldKids) {
-      const key = getKey(k);
-      if (key != null) oldKeyed.set(key, k);
-      else oldUnkeyed.push(k);
-    }
-
-    let prevDom: Node | null = null;
-
-    for (let i = 0; i < newKids.length; i++) {
-      const newK = newKids[i];
-      const newKey = getKey(newK);
-
-      let match: VNode | null = null;
-
-      if (newKey != null) {
-        match = oldKeyed.get(newKey) || null;
-        if (match) oldKeyed.delete(newKey);
-      } else {
-        let idx = -1;
-        for (let j = 0; j < oldUnkeyed.length; j++) {
-          if (isSameType(oldUnkeyed[j], newK)) {
-            idx = j;
-            break;
-          }
-        }
-        if (idx === -1 && oldUnkeyed.length) idx = 0;
-        if (idx !== -1) match = oldUnkeyed.splice(idx, 1)[0];
-      }
-
-      const childDom = diff(parent, match, newK, inst, null);
-      if (childDom) {
-        const containerEl = parent as Element;
-        const needsMove =
-          childDom !== prevDom &&
-          (childDom.parentNode !== containerEl ||
-            childDom.previousSibling !== prevDom);
-        if (needsMove) {
-          containerEl.insertBefore(
-            childDom,
-            prevDom ? prevDom.nextSibling : containerEl.firstChild
-          );
-        }
-        prevDom = childDom;
-      }
-    }
-
-    for (const leftover of oldKeyed.values()) {
-      unmount(leftover);
-      if (leftover.__dom && leftover.__dom.parentNode === parent) {
-        (parent as Element).removeChild(leftover.__dom);
-      }
-    }
-    for (const leftover of oldUnkeyed) {
-      unmount(leftover);
-      if (leftover.__dom && leftover.__dom.parentNode === parent) {
-        (parent as Element).removeChild(leftover.__dom);
-      }
-    }
-
-    newVNode.__dom = oldVNode?.__dom ?? null; // not meaningful for fragments
-    return prevDom;
   }
 
   // Text node
@@ -662,5 +587,5 @@ function cloneVNode(v: VNode | null): VNode | null {
 }
 
 // Default export for convenience
-const tiny = { h, render, mount, useState, useEffect, Fragment };
+const tiny = { h, render, mount, useState, useEffect };
 export default tiny;
