@@ -3,7 +3,7 @@
 https://tiny-vdom.netlify.app/
 
 <p align="center">
-  <img src="./preview/tiny-preact-split-50-50.png" alt="Preview do site Tiny-vdom" width="100%" />
+  <img src="./preview/light-mode.png" alt="Preview do site Tiny-vdom" width="100%" />
 </p>
 
 Uma mini-lib **React/Preact-like** super simples (`tiny-vdom.ts`) com `h`, `mount`, `useState`, `useEffect`, `useRef`;
