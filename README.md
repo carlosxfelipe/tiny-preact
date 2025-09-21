@@ -6,7 +6,7 @@ https://tiny-preact-demo.netlify.app/
   <img src="./preview/tiny-preact-split-50-50.png" alt="Preview do app My Food no modo escuro" width="100%" />
 </p>
 
-Uma mini-lib **React/Preact-like** super simples (`tiny-preact.ts`) com `h`, `mount`, `useState`, `useEffect`;
+Uma mini-lib **React/Preact-like** super simples (`tiny-preact.ts`) com `h`, `mount`, `useState`, `useEffect`, `useRef`;
 
 ## Requisitos
 
@@ -36,12 +36,13 @@ Também é possível escrever **sem JSX**, usando `h("div", ...)`.
 
 - `h(type, props, ...children)` — cria VNodes (suporta objetos `style`, atributos, e eventos via `onClick`, etc.).
 - `mount(vnode, container)` / `render(vnode, container)` — renderer com diff básico **com suporte a keys** (reconciliação chaveada).
-- Hooks: `useState`, `useEffect` (efeitos executados em **microtask** logo após o commit; *não garante pós-paint*).
+- Hooks: `useState`, `useEffect`, `useRef`.
 
 Tipos:
 
-- `JSX.Element` é mapeado para `VNode` via `src/jsx.d.ts`.
+- `JSX.Element` é mapeado para `VNode` via `tiny-preact/jsx.d.ts`.
 - `JSX.IntrinsicElements` é aberto como um índice (`Record<string, unknown>`) para permitir tags HTML e atributos comuns.
+- `ref` é suportado em elementos: callback `(el) => void` ou objeto `{ current: Element | null }`.
 
 ## Produção
 

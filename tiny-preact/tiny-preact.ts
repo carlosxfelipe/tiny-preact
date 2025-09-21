@@ -512,6 +512,16 @@ export function useEffect(
   if (changed) comp.effects.push({ i, effect });
 }
 
+export function useRef<T>(initial: T): { current: T } {
+  const comp = CURRENT;
+  if (!comp) throw new Error("useRef must be called inside a component");
+  const i = comp.hookIndex++;
+  if (comp.hooks[i] === undefined) {
+    comp.hooks[i] = { current: initial };
+  }
+  return comp.hooks[i] as { current: T };
+}
+
 // --- Effects ---------------------------------------------------------------
 let __scheduled = false;
 
@@ -587,5 +597,5 @@ function cloneVNode(v: VNode | null): VNode | null {
 }
 
 // Default export for convenience
-const tiny = { h, render, mount, useState, useEffect };
+const tiny = { h, render, mount, useState, useEffect, useRef };
 export default tiny;
