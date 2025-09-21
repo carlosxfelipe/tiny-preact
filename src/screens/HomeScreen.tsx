@@ -37,8 +37,8 @@ export default function HomeScreen() {
 
       <div style={styles.featuresCard}>
         <p style={styles.featuresIntro}>
-          Além do núcleo, o Tiny-preact traz dois recursos extras que facilitam
-          o desenvolvimento:
+          Além do núcleo, o Tiny-vdom traz dois recursos extras que facilitam o
+          desenvolvimento:
         </p>
         <ul style={styles.featuresList}>
           <li style={styles.featureItem}>
@@ -68,12 +68,12 @@ export default function HomeScreen() {
       <p style={styles.githubLink}>
         <Icon name="github" size={18} aria-hidden="true" />
         <a
-          href="https://github.com/carlosxfelipe/tiny-preact"
+          href="https://github.com/carlosxfelipe/tiny-vdom"
           target="_blank"
           rel="noopener noreferrer"
           class="link"
         >
-          github.com/carlosxfelipe/tiny-preact
+          github.com/carlosxfelipe/tiny-vdom
         </a>
       </p>
     </section>

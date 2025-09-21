@@ -1,4 +1,4 @@
-# Tiny-preact
+# Tiny-vdom
 
 https://tiny-preact-demo.netlify.app/
 
