@@ -40,6 +40,7 @@ export default function CounterScreen() {
         </Button>
       </div>
       <p style={styles.kbdHint}>atalhos: [+], [−], [0] ou [R]</p>
+      {/* <p>{hello("Mundo")}</p> */}
     </div>
   );
 }
