@@ -3,6 +3,7 @@ import {
   CounterScreen,
   AboutScreen,
   PokeScreen,
+  LoginScreen,
 } from "@screens/index.ts";
 
 export const ROUTE_DEFS = [
@@ -22,14 +23,20 @@ export const ROUTE_DEFS = [
     component: PokeScreen,
     layout: { fluid: true },
   },
+  {
+    path: "#/login" as const,
+    component: LoginScreen,
+    layout: { fluid: false, navbar: false },
+  },
 ] as const;
 
 export type Route = (typeof ROUTE_DEFS)[number]["path"];
 type ScreenCmp = () => JSX.Element;
+type LayoutMeta = { fluid?: boolean; navbar?: boolean };
 
 export const ROUTES: Record<
   Route,
-  { component: ScreenCmp; layout?: { fluid?: boolean } }
+  { component: ScreenCmp; layout?: LayoutMeta }
 > = Object.fromEntries(
   ROUTE_DEFS.map((r) => [r.path, { component: r.component, layout: r.layout }])
-) as Record<Route, { component: ScreenCmp; layout?: { fluid?: boolean } }>;
+) as Record<Route, { component: ScreenCmp; layout?: LayoutMeta }>;

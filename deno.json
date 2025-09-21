@@ -24,6 +24,7 @@
     "@lib/": "./src/lib/",
     "@src/": "./src/",
     "@components/": "./src/components/",
+    "@layout/": "./src/layout/",
     "@icons/": "./src/icons/",
     "@screens/": "./src/screens/",
     "@styles/": "./src/styles/",

@@ -7,16 +7,18 @@ interface LayoutProps {
   children?: Child | Child[];
   fluid?: boolean;
   currentPath?: string;
+  showNavbar?: boolean;
 }
 
 export default function Layout({
   children = [],
   fluid = false,
   currentPath,
+  showNavbar = true,
 }: LayoutProps) {
   return (
     <div>
-      <Navbar currentPath={currentPath} />
+      {showNavbar ? <Navbar currentPath={currentPath} /> : null}
       <main
         style={{
           ...styles.page,
@@ -37,8 +39,5 @@ const styles = StyleSheet.create({
     padding: "24px clamp(14px, 4vw, 16px) 32px",
     paddingTop: "calc(24px + env(safe-area-inset-top))",
   },
-  pageFluid: {
-    width: "100%",
-    maxWidth: "none",
-  },
+  pageFluid: { width: "100%", maxWidth: "none" },
 });

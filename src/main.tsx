@@ -1,7 +1,7 @@
 import "@styles/styles.css";
 import "@styles/vt.css";
 import { h, mount, useEffect, useState } from "@tiny/tiny-preact.ts";
-import Layout from "@components/Layout.tsx";
+import Layout from "@layout/Layout.tsx";
 import {
   ROUTES,
   getRoute,
@@ -20,7 +20,11 @@ function App() {
   const { component: Screen, layout } = ROUTES[route];
 
   return (
-    <Layout currentPath={route} fluid={layout?.fluid ?? false}>
+    <Layout
+      currentPath={route}
+      fluid={layout?.fluid ?? false}
+      showNavbar={layout?.navbar ?? true}
+    >
       <Screen key={route} />
     </Layout>
   );
