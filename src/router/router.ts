@@ -1,4 +1,4 @@
-import { withViewTransition } from "@src/vt.ts";
+import { withViewTransition } from "@lib/vt.ts";
 import { HomeScreen, CounterScreen, AboutScreen } from "@screens/index.ts";
 import PokeScreen from "@screens/PokeScreen.tsx";
 
