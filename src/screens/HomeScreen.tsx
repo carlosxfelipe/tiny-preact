@@ -1,14 +1,23 @@
-import { h } from "@tiny/tiny-preact.ts";
+import { h, useRef } from "@tiny/tiny-preact.ts";
+import Button from "@components/Button.tsx";
 
 export default function HomeScreen() {
+  const headingRef = useRef<HTMLHeadingElement | null>(null);
+
+  function highlightTitle() {
+    if (headingRef.current) {
+      headingRef.current.style.color = "tomato";
+    }
+  }
+
   return (
     <section>
-      <h1>Bem-vindo ao Tiny-preact</h1>
+      <h1 ref={headingRef}>Bem-vindo ao Tiny-preact</h1>
       <p>
         O <strong>Tiny-preact</strong> é uma mini-lib inspirada em React/Preact,
         criada para demonstrações e sites estáticos simples. Ele oferece um
         núcleo enxuto com suporte a <code>h</code>, <code>mount</code>,{" "}
-        <code>useState</code> e <code>useEffect</code>.
+        <code>useState</code>, <code>useEffect</code> e <code>useRef</code>.
       </p>
       <p>
         A proposta é permitir a criação de componentes reativos com JSX
@@ -32,6 +41,13 @@ export default function HomeScreen() {
         </a>
         .
       </p>
+      <Button
+        variant="primary"
+        onClick={highlightTitle}
+        ariaLabel="Highlight the title"
+      >
+        Destacar título
+      </Button>
     </section>
   );
 }
