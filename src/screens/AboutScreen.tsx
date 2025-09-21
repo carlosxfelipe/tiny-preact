@@ -14,6 +14,12 @@ export default function AboutScreen() {
         <em>Mobile e Front-end</em>.
       </p>
 
+      <p>
+        <a href="#/pokedex" class="link">
+          Ir para Pokédex
+        </a>
+      </p>
+
       <h2>Contato</h2>
       <ul style={styles.list}>
         <li style={styles.item}>

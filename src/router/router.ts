@@ -1,7 +1,8 @@
 import { withViewTransition } from "@src/vt.ts";
 import { HomeScreen, CounterScreen, AboutScreen } from "@screens/index.ts";
+import PokeScreen from "@screens/PokeScreen.tsx";
 
-export type Route = "#/" | "#/counter" | "#/about";
+export type Route = "#/" | "#/counter" | "#/about" | "#/pokedex";
 type ScreenCmp = () => JSX.Element;
 
 /**
@@ -35,12 +36,14 @@ export const ROUTES: Record<
     component: AboutScreen,
     layout: { fluid: false },
   },
+  "#/pokedex": { component: PokeScreen, layout: { fluid: true } },
 };
 
 export function getRoute(): Route {
   const h = globalThis.location?.hash || "#/";
   if (h.startsWith("#/counter")) return "#/counter";
   if (h.startsWith("#/about")) return "#/about";
+  if (h.startsWith("#/pokedex")) return "#/pokedex";
   return "#/";
 }
 
