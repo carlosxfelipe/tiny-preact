@@ -1,35 +1,23 @@
 import { navigate as vtNavigate, setTransitionScope } from "@lib/vt.ts";
-import { HomeScreen, CounterScreen, AboutScreen } from "@screens/index.ts";
-import PokeScreen from "@screens/PokeScreen.tsx";
+import { ROUTE_DEFS, ROUTES } from "./routes.ts";
+import type { Route } from "./routes.ts";
 
-export type Route = "#/" | "#/counter" | "#/about" | "#/pokedex";
-type ScreenCmp = () => JSX.Element;
+export { ROUTES };
+export type { Route };
 
-export const ROUTES: Record<
-  Route,
-  { component: ScreenCmp; layout?: { fluid?: boolean } }
-> = {
-  "#/": { component: HomeScreen, layout: { fluid: false } },
-  "#/counter": { component: CounterScreen, layout: { fluid: false } },
-  "#/about": { component: AboutScreen, layout: { fluid: false } },
-  "#/pokedex": { component: PokeScreen, layout: { fluid: true } },
-};
-
-/** Get the current route from the URL hash. */
 export function getRoute(): Route {
   const h = globalThis.location?.hash || "#/";
-  if (h.startsWith("#/counter")) return "#/counter";
-  if (h.startsWith("#/about")) return "#/about";
-  if (h.startsWith("#/pokedex")) return "#/pokedex";
-  return "#/";
+  const match =
+    ROUTE_DEFS.filter((r) => h === r.path || h.startsWith(r.path)).sort(
+      (a, b) => b.path.length - a.path.length
+    )[0] ?? ROUTE_DEFS[0];
+  return match.path;
 }
 
-/** Attach a hashchange listener that triggers a route update inside a view transition. */
 export function attachRouter(setRoute: (r: Route) => void): () => void {
   const onHash = () => {
     const next = getRoute();
     vtNavigate(() => {
-      // Mark <main> as the "page" transition scope (logical equivalent to Astro's approach).
       const main = document.querySelector("main");
       if (main) setTransitionScope(main, "page");
       setRoute(next);
@@ -39,7 +27,6 @@ export function attachRouter(setRoute: (r: Route) => void): () => void {
   return () => globalThis.removeEventListener("hashchange", onHash);
 }
 
-/** Programmatically navigate to a given route using a view transition. */
 export function navigate(to: Route) {
   if (globalThis.location?.hash !== to) {
     vtNavigate(() => {
