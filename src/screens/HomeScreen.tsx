@@ -1,4 +1,5 @@
 import { h, useRef } from "@tiny/tiny-preact.ts";
+import { StyleSheet } from "@styles/stylesheet.ts";
 import Button from "@components/Button.tsx";
 
 export default function HomeScreen() {
@@ -29,6 +30,37 @@ export default function HomeScreen() {
         gerar arquivos prontos para produção em <code>dist/</code> e servir de
         forma estática em qualquer CDN ou edge server.
       </p>
+
+      <div style={styles.featuresCard}>
+        <p style={styles.featuresIntro}>
+          Além do núcleo, o Tiny-preact traz dois recursos extras que facilitam
+          o desenvolvimento:
+        </p>
+        <ul style={styles.featuresList}>
+          <li style={styles.featureItem}>
+            <span aria-hidden="true" style={styles.emoji}>
+              🧠
+            </span>
+            <div style={styles.featureText}>
+              <strong>Gerenciamento de estado</strong>: inspirado em zustand,
+              com <code>createStore</code>, <em>set</em>/<em>get</em>,
+              selectors, persistência opcional em <code>localStorage</code>,
+              suporte a assinaturas e sincronização entre abas.
+            </div>
+          </li>
+          <li style={styles.featureItem}>
+            <span aria-hidden="true" style={styles.emoji}>
+              🎨
+            </span>
+            <div style={styles.featureText}>
+              <strong>StyleSheet utilitário</strong>: inspirado no React Native,
+              permitindo declarar estilos em objetos TypeScript, fazer
+              merge/compose de estilos e usar variáveis CSS de forma prática.
+            </div>
+          </li>
+        </ul>
+      </div>
+
       <p>
         O código-fonte está disponível no{" "}
         <a
@@ -51,3 +83,41 @@ export default function HomeScreen() {
     </section>
   );
 }
+
+const styles = StyleSheet.create({
+  featuresCard: {
+    border: "1px solid var(--card-border)",
+    background: "var(--card-bg)",
+    borderRadius: 14,
+    padding: 16,
+    boxShadow: "var(--shadow)",
+    margin: "16px 0 12px",
+  },
+  featuresIntro: {
+    marginTop: 0,
+    marginBottom: 10,
+  },
+  featuresList: {
+    listStyle: "none",
+    padding: 0,
+    margin: 0,
+    display: "grid",
+    gap: 10,
+  },
+  featureItem: {
+    display: "grid",
+    gridTemplateColumns: "auto 1fr",
+    alignItems: "start",
+    gap: 10,
+    padding: 10,
+    border: "1px solid var(--btn-border)",
+    borderRadius: 12,
+    background: "var(--btn-bg)",
+  },
+  emoji: {
+    fontSize: 18,
+    lineHeight: 1,
+    marginTop: 2,
+  },
+  featureText: {},
+});
