@@ -530,10 +530,10 @@ function scheduleFlush() {
   __scheduled = true;
   Promise.resolve().then(() => {
     __scheduled = false;
-    // Flush pending effects for all roots marked with [data-tiny-preact-root]
+    // Flush pending effects for all roots marked with [data-tiny-vdom-root]
     const roots = new Set<HTMLElement>();
     document
-      .querySelectorAll<HTMLElement>("[data-tiny-preact-root]")
+      .querySelectorAll<HTMLElement>("[data-tiny-vdom-root]")
       .forEach((el) => roots.add(el));
     for (const root of roots) {
       const vnode = ROOT_VNODE.get(root) ?? null;
@@ -572,20 +572,18 @@ function flushEffects(_inst: HookBag) {
 }
 
 function findRoot(_comp: HookBag): HTMLElement | null {
-  // Returns the first root with [data-tiny-preact-root]; only a single root is fully supported for state updates
-  const roots = document.querySelectorAll<HTMLElement>(
-    "[data-tiny-preact-root]"
-  );
+  // Returns the first root with [data-tiny-vdom-root]; only a single root is fully supported for state updates
+  const roots = document.querySelectorAll<HTMLElement>("[data-tiny-vdom-root]");
   return roots[0] || null;
 }
 
-// Helper to mount an app quickly. Adds [data-tiny-preact-root], used by the scheduler to discover roots and flush effects.
+// Helper to mount an app quickly. Adds [data-tiny-vdom-root], used by the scheduler to discover roots and flush effects.
 export function mount(
   vnode: VNode | null,
   container: HTMLElement
 ): Node | null {
-  if (!container.hasAttribute("data-tiny-preact-root"))
-    container.setAttribute("data-tiny-preact-root", "");
+  if (!container.hasAttribute("data-tiny-vdom-root"))
+    container.setAttribute("data-tiny-vdom-root", "");
   return render(vnode, container);
 }
 

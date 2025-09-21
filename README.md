@@ -1,9 +1,9 @@
 # Tiny-vdom
 
-https://tiny-preact-demo.netlify.app/
+https://tiny-vdom.netlify.app/
 
 <p align="center">
-  <img src="./preview/tiny-preact-split-50-50.png" alt="Preview do app My Food no modo escuro" width="100%" />
+  <img src="./preview/tiny-preact-split-50-50.png" alt="Preview do site Tiny-vdom" width="100%" />
 </p>
 
 Uma mini-lib **React/Preact-like** super simples (`tiny-vdom.ts`) com `h`, `mount`, `useState`, `useEffect`, `useRef`;
@@ -40,7 +40,7 @@ Também é possível escrever **sem JSX**, usando `h("div", ...)`.
 
 Tipos:
 
-- `JSX.Element` é mapeado para `VNode` via `tiny-preact/jsx.d.ts`.
+- `JSX.Element` é mapeado para `VNode` via `tiny-vdom/jsx.d.ts`.
 - `JSX.IntrinsicElements` é aberto como um índice (`Record<string, unknown>`) para permitir tags HTML e atributos comuns.
 - `ref` é suportado em elementos: callback `(el) => void` ou objeto `{ current: Element | null }`.
 
