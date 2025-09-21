@@ -1,7 +1,7 @@
-import { h, useEffect, useState } from "@lib/tiny-preact.ts";
+import { h, useEffect, useState } from "@tiny/tiny-preact.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 import { withViewTransition, supportsViewTransitions } from "@src/vt.ts";
-import { http } from "../lib/http.ts";
+import { http } from "@lib/http.ts";
 
 // --- Types -------------------------------------------------------------------
 type ApiResult = {

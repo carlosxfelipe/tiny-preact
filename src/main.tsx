@@ -1,5 +1,5 @@
 import "@styles/styles.css";
-import { h, mount, useEffect, useState } from "@lib/tiny-preact.ts";
+import { h, mount, useEffect, useState } from "@tiny/tiny-preact.ts";
 import Layout from "@components/Layout.tsx";
 import {
   ROUTES,

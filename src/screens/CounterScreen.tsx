@@ -1,4 +1,4 @@
-import { h, useState, useEffect } from "@lib/tiny-preact.ts";
+import { h, useState, useEffect } from "@tiny/tiny-preact.ts";
 import Icon from "@icons/Icon.tsx";
 import Button from "@components/Button.tsx";
 import { StyleSheet } from "@styles/stylesheet.ts";
