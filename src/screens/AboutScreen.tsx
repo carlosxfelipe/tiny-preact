@@ -14,12 +14,6 @@ export default function AboutScreen() {
         <em>Mobile e Front-end</em>.
       </p>
 
-      <p>
-        <a href="#/pokedex" class="link">
-          Ir para Pokédex
-        </a>
-      </p>
-
       <h2>Contato</h2>
       <ul style={styles.list}>
         <li style={styles.item}>
@@ -68,6 +62,16 @@ export default function AboutScreen() {
             Fortaleza, Ceará, Brasil •{" "}
             <a href="tel:+5585999502195" class="link">
               (85) 99950-2195
+            </a>
+          </span>
+        </li>
+
+        <li style={styles.item}>
+          <Icon name="pokemon-go" size={20} aria-hidden="true" />
+          <span>
+            Quem é fã de Pokémon?{" "}
+            <a href="#/pokedex" class="link">
+              Ir para Pokédex
             </a>
           </span>
         </li>
