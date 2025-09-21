@@ -25,7 +25,9 @@ function App() {
       fluid={layout?.fluid ?? false}
       showNavbar={layout?.navbar ?? true}
     >
-      <Screen key={route} />
+      <div key={`screen:${route}`} data-screen-root>
+        <Screen />
+      </div>
     </Layout>
   );
 }

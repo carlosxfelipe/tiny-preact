@@ -20,6 +20,7 @@ export default function Layout({
     <div>
       {showNavbar ? <Navbar currentPath={currentPath} /> : null}
       <main
+        key={`main:${currentPath ?? ""}`}
         style={{
           ...styles.page,
           ...(fluid ? styles.pageFluid : {}),
