@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     boxShadow: "var(--shadow)",
     background: "var(--card-bg)",
-    margin: "0 auto",
+    margin: "24px auto 0",
     textAlign: "center",
   },
   title: {

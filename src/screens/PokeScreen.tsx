@@ -1,22 +1,18 @@
 import { h, useEffect, useState } from "@tiny/tiny-preact.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
-import { withViewTransition, supportsViewTransitions } from "@src/vt.ts";
 import { http } from "@lib/http.ts";
 
-// --- Types -------------------------------------------------------------------
 type ApiResult = {
-  results: Array<{ name: string; url: string }>; // url ends with /pokemon/:id/
+  results: Array<{ name: string; url: string }>;
 };
 
 type Pokemon = {
   id: number;
   name: string;
-  img: string; // official-artwork
+  img: string;
 };
 
-// --- Helpers -----------------------------------------------------------------
 function idFromUrl(url: string): number {
-  // .../pokemon/25/ → 25
   const m = url.match(/\/pokemon\/(\d+)\/?$/);
   return m ? Number(m[1]) : 0;
 }
@@ -25,7 +21,6 @@ function artUrl(id: number): string {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 }
 
-// --- Screen ------------------------------------------------------------------
 export default function PokeScreen() {
   const [list, setList] = useState<Pokemon[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -55,18 +50,17 @@ export default function PokeScreen() {
     return () => controller.abort();
   }, []);
 
-  // Close on ESC when modal is open
   useEffect(() => {
     if (openId == null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") withViewTransition(() => setOpenId(null));
+      if (e.key === "Escape") setOpenId(null);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [openId]);
 
-  const open = (id: number) => withViewTransition(() => setOpenId(id));
-  const close = () => withViewTransition(() => setOpenId(null));
+  const open = (id: number) => setOpenId(id);
+  const close = () => setOpenId(null);
 
   return (
     <section>
@@ -82,10 +76,6 @@ export default function PokeScreen() {
           >
             PokeAPI
           </a>
-          {" · "}
-          {supportsViewTransitions()
-            ? "transições ativas"
-            : "transições desativadas"}
         </p>
       </header>
 
@@ -104,7 +94,6 @@ export default function PokeScreen() {
                 onClick={() => open(p.id)}
               >
                 <div style={styles.thumbWrap}>
-                  {/* Match by viewTransitionName to zoom from card → modal */}
                   <img
                     src={p.img}
                     alt=""
@@ -124,7 +113,6 @@ export default function PokeScreen() {
         </ul>
       )}
 
-      {/* Modal / Lightbox ---------------------------------------------------- */}
       {openId != null ? (
         <div
           role="dialog"
@@ -185,7 +173,6 @@ function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// --- Styles ------------------------------------------------------------------
 const styles = StyleSheet.create({
   error: {
     border: "1px solid var(--danger)",
@@ -204,7 +191,6 @@ const styles = StyleSheet.create({
     letterSpacing: "-0.02em",
   },
   subtitle: { margin: 0, color: "var(--muted)", fontSize: 14 },
-
   grid: {
     listStyle: "none",
     padding: 0,
@@ -229,6 +215,7 @@ const styles = StyleSheet.create({
     border: 0,
     padding: 12,
     cursor: "pointer",
+    color: "var(--fg)",
   },
   thumbWrap: {
     display: "grid",
@@ -240,9 +227,12 @@ const styles = StyleSheet.create({
     height: "auto",
     filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.15))",
   },
-  name: { fontWeight: 700, marginTop: 8, textTransform: "capitalize" },
-
-  // Skeletons
+  name: {
+    fontWeight: 700,
+    marginTop: 8,
+    textTransform: "capitalize",
+    color: "var(--fg)",
+  },
   skelImg: {
     width: "100%",
     aspectRatio: "1 / 1",
@@ -257,12 +247,12 @@ const styles = StyleSheet.create({
     background: "#00000010",
     borderRadius: 6,
   },
-
-  // Modal
   modalBackdrop: {
     position: "fixed",
     inset: 0,
-    background: "color-mix(in srgb, var(--bg) 60%, #000 40%)",
+    background: "rgba(0,0,0,0.35)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
     display: "grid",
     placeItems: "center",
     padding: 16,
@@ -308,7 +298,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Keyframes for skeleton shimmer (added inline to avoid touching global CSS)
 (() => {
   const id = "poke-skel-keyframes";
   if (!document.getElementById(id)) {
