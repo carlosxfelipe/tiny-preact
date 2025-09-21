@@ -1,4 +1,4 @@
-import { h, useRef } from "@tiny/tiny-preact.ts";
+import { h, useRef } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 import Icon from "@icons/Icon.tsx";
 
@@ -13,9 +13,9 @@ export default function HomeScreen() {
 
   return (
     <section>
-      <h1 ref={headingRef}>Bem-vindo ao Tiny-preact</h1>
+      <h1 ref={headingRef}>Bem-vindo ao Tiny-vdom</h1>
       <p>
-        O <strong>Tiny-preact</strong> é uma mini-lib inspirada em React/Preact,
+        O <strong>Tiny-vdom</strong> é uma mini-lib inspirada em React/Preact,
         criada para demonstrações e sites estáticos simples. Ele oferece um
         núcleo enxuto com suporte a <code>h</code>, <code>mount</code>,{" "}
         <code>useState</code>, <code>useEffect</code> e{" "}

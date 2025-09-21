@@ -1,4 +1,4 @@
-import type { VNode } from "./tiny-preact.ts";
+import type { VNode } from "./tiny-vdom.ts";
 
 export {};
 

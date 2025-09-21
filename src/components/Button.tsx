@@ -1,4 +1,4 @@
-import { h, useState } from "@tiny/tiny-preact.ts";
+import { h, useState } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 
 type Variant = "default" | "primary" | "danger";

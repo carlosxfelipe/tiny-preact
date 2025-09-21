@@ -1,4 +1,4 @@
-import { h } from "@tiny/tiny-preact.ts";
+import { h } from "@tiny/tiny-vdom.ts";
 
 interface NavbarProps {
   currentPath?: string;
@@ -18,7 +18,7 @@ export default function Navbar({ currentPath = "#/" }: NavbarProps) {
     <header class="navbar" role="navigation" aria-label="Principal">
       <div class="nav-inner">
         <a href="#/" class="nav-brand">
-          Tiny-preact
+          Tiny-vdom
         </a>
         <nav class="nav-links">
           {links.map(({ href, label }) => (

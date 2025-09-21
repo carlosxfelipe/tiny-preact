@@ -1,4 +1,4 @@
-import { h } from "@tiny/tiny-preact.ts";
+import { h } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 import Button from "@components/Button.tsx";
 

@@ -1,4 +1,4 @@
-import { h, useEffect, useState } from "@tiny/tiny-preact.ts";
+import { h, useEffect, useState } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 import { http } from "@lib/http.ts";
 

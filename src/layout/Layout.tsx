@@ -1,5 +1,5 @@
-import { h } from "@tiny/tiny-preact.ts";
-import type { Child } from "@tiny/tiny-preact.ts";
+import { h } from "@tiny/tiny-vdom.ts";
+import type { Child } from "@tiny/tiny-vdom.ts";
 import Navbar from "@components/Navbar.tsx";
 import { StyleSheet } from "@styles/stylesheet.ts";
 

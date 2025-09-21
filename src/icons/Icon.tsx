@@ -1,4 +1,4 @@
-import { h } from "@tiny/tiny-preact.ts";
+import { h } from "@tiny/tiny-vdom.ts";
 import { ICONS, type IconName } from "@icons/paths.ts";
 
 type Props = {

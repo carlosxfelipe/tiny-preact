@@ -15,12 +15,12 @@
       "deno.ns"
     ],
     "types": [
-      "./tiny-preact/jsx.d.ts"
+      "./tiny-vdom/jsx.d.ts"
     ]
   },
   "imports": {
     "@std/http/file-server": "jsr:@std/http/file-server",
-    "@tiny/": "./tiny-preact/",
+    "@tiny/": "./tiny-vdom/",
     "@lib/": "./src/lib/",
     "@src/": "./src/",
     "@components/": "./src/components/",
