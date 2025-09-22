@@ -522,6 +522,43 @@ export function useRef<T>(initial: T): { current: T } {
   return comp.hooks[i] as { current: T };
 }
 
+export function useMemo<T>(factory: () => T, deps?: readonly unknown[]): T {
+  const comp = CURRENT;
+  if (!comp) throw new Error("useMemo must be called inside a component");
+  const i = comp.hookIndex++;
+
+  type Slot = { deps?: readonly unknown[]; value: T };
+  const prev = comp.hooks[i] as Slot | undefined;
+
+  const changed =
+    !prev ||
+    !deps || // if deps is undefined, recompute every render (React-compatible behavior)
+    prev.deps?.length !== deps.length || // different length means deps changed
+    deps.some((d, idx) => !Object.is(d, prev.deps?.[idx])); // shallow compare each dep
+
+  if (changed) {
+    const value = factory();
+    if (prev) {
+      // Reuse the same slot object to avoid creating a new one
+      prev.deps = deps;
+      prev.value = value;
+      comp.hooks[i] = prev;
+    } else {
+      comp.hooks[i] = { deps, value } as Slot;
+    }
+  }
+
+  return (comp.hooks[i] as Slot).value;
+}
+
+export function useCallback<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+  deps?: readonly unknown[]
+): T {
+  // useCallback is just useMemo that returns the function
+  return useMemo(() => fn, deps);
+}
+
 // --- Effects ---------------------------------------------------------------
 let __scheduled = false;
 
@@ -595,5 +632,14 @@ function cloneVNode(v: VNode | null): VNode | null {
 }
 
 // Default export for convenience
-const tiny = { h, render, mount, useState, useEffect, useRef };
+const tiny = {
+  h,
+  render,
+  mount,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+};
 export default tiny;
