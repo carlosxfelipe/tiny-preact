@@ -1,7 +1,6 @@
-import { h, useEffect, useState } from "@tiny/tiny-vdom.ts";
+import { h, useEffect, useRef, useState } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 import { http } from "@lib/http.ts";
-import FlatList from "@components/FlatList.tsx";
 
 type ApiResult = {
   results: Array<{ name: string; url: string }>;
@@ -15,6 +14,7 @@ type Pokemon = {
 
 const PAGE_SIZE = 25;
 const MAX_ITEMS = 150;
+const TOTAL_PAGES = Math.ceil(MAX_ITEMS / PAGE_SIZE);
 
 function idFromUrl(url: string): number {
   const m = url.match(/\/pokemon\/(\d+)\/?$/);
@@ -26,75 +26,61 @@ function artUrl(id: number): string {
 }
 
 export default function PokeScreen() {
+  const [page, setPage] = useState(0);
   const [list, setList] = useState<Pokemon[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [openId, setOpenId] = useState<number | null>(null);
-  const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const cacheRef = useRef<Record<number, Pokemon[]>>({});
 
-  async function fetchPage(nextOffset: number, signal: AbortSignal) {
-    const remaining = Math.max(0, MAX_ITEMS - nextOffset);
-    if (remaining === 0) {
-      setHasMore(false);
+  async function fetchPage(pageIndex: number, signal: AbortSignal) {
+    const start = pageIndex * PAGE_SIZE;
+    const remaining = Math.max(0, MAX_ITEMS - start);
+    const limit = Math.min(PAGE_SIZE, remaining);
+    if (limit <= 0) {
+      setList([]);
       return;
     }
-    const limit = Math.min(PAGE_SIZE, remaining);
-
+    if (cacheRef.current[pageIndex]) {
+      setList(cacheRef.current[pageIndex]);
+      return;
+    }
     const { data } = await http.get<ApiResult>(
-      `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${nextOffset}`,
+      `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${start}`,
       { signal }
     );
-
     const mapped: Pokemon[] = data.results.map((p) => {
       const id = idFromUrl(p.url);
       return { id, name: p.name, img: artUrl(id) };
     });
-
-    setList((prev) => [...prev, ...mapped]);
-    const newOffset = nextOffset + mapped.length;
-    setOffset(newOffset);
-    if (newOffset >= MAX_ITEMS) setHasMore(false);
+    cacheRef.current[pageIndex] = mapped;
+    setList(mapped);
   }
 
   useEffect(() => {
     const controller = new AbortController();
     const { signal } = controller;
-
     (async () => {
       try {
+        setError(null);
         setLoading(true);
-        await fetchPage(0, signal);
+        await fetchPage(page, signal);
       } catch (e) {
         if ((e as Error).name !== "AbortError") {
-          setError("Falha ao carregar Pokémons. Tente novamente.");
+          setError("Falha ao carregar Pokémons.");
         }
       } finally {
         setLoading(false);
       }
     })();
-
     return () => controller.abort();
-  }, []);
-
-  const loadMore = async () => {
-    if (loading || !hasMore) return;
-    const controller = new AbortController();
-    const { signal } = controller;
-    try {
-      setLoading(true);
-      await fetchPage(offset, signal);
-    } catch (e) {
-      if ((e as Error).name !== "AbortError") {
-        setError("Falha ao carregar mais Pokémons.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [page]);
 
   const open = (id: number) => setOpenId(id);
   const close = () => setOpenId(null);
+
+  const canPrev = page > 0 && !loading;
+  const canNext = page < TOTAL_PAGES - 1 && !loading;
 
   return (
     <section>
@@ -113,15 +99,40 @@ export default function PokeScreen() {
         </p>
       </header>
 
+      <div style={styles.pager}>
+        <button
+          type="button"
+          style={{ ...styles.pagerBtn, opacity: canPrev ? 1 : 0.5 }}
+          onClick={() => canPrev && setPage((p) => Math.max(0, p - 1))}
+          disabled={!canPrev}
+          aria-label="Página anterior"
+        >
+          ◀ Anterior
+        </button>
+        <span style={styles.pagerLabel}>
+          Página {page + 1} / {TOTAL_PAGES}
+        </span>
+        <button
+          type="button"
+          style={{ ...styles.pagerBtn, opacity: canNext ? 1 : 0.5 }}
+          onClick={() =>
+            canNext && setPage((p) => Math.min(TOTAL_PAGES - 1, p + 1))
+          }
+          disabled={!canNext}
+          aria-label="Próxima página"
+        >
+          Próxima ▶
+        </button>
+      </div>
+
       {error ? (
         <div style={styles.error}>{error}</div>
       ) : list.length === 0 && loading ? (
         <GridSkeleton />
       ) : (
-        <FlatList
-          data={list}
-          renderItem={({ item }) => (
-            <div style={styles.card}>
+        <div style={styles.grid}>
+          {list.map((item) => (
+            <div key={item.id} style={styles.card}>
               <button
                 type="button"
                 style={styles.cardBtn}
@@ -144,24 +155,13 @@ export default function PokeScreen() {
                 <span style={styles.name}>{capitalize(item.name)}</span>
               </button>
             </div>
-          )}
-          keyExtractor={(p) => p.id}
-          contentContainerStyle={styles.grid as JSX.StyleObject}
-          onEndReached={hasMore ? loadMore : undefined}
-          onEndReachedThreshold={480}
-          loading={loading}
-          horizontal={false}
-          style={{ paddingBottom: 16 }}
-          ListFooterComponent={() =>
-            loading ? (
-              <div style={{ textAlign: "center", padding: 12 }}>
-                Carregando…
-              </div>
-            ) : null
-          }
-          ListEmptyComponent={GridSkeleton}
-        />
+          ))}
+        </div>
       )}
+
+      {loading && list.length > 0 ? (
+        <div style={{ textAlign: "center", padding: 12 }}>Carregando…</div>
+      ) : null}
 
       {openId != null ? (
         <div
@@ -241,6 +241,27 @@ const styles = StyleSheet.create({
     letterSpacing: "-0.02em",
   },
   subtitle: { margin: 0, color: "var(--muted)", fontSize: 14 },
+  pager: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 12,
+  },
+  pagerBtn: {
+    appearance: "none",
+    border: "1px solid var(--btn-border)",
+    background: "var(--btn-bg)",
+    color: "var(--fg)",
+    padding: "8px 12px",
+    borderRadius: 10,
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  pagerLabel: {
+    flex: 1,
+    textAlign: "center",
+    fontWeight: 700,
+  },
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
