@@ -6,7 +6,7 @@ https://tiny-vdom.netlify.app/
   <img src="./preview/light-mode.png" alt="Preview do site Tiny-vdom" width="100%" />
 </p>
 
-Uma mini-lib **React/Preact-like** super simples (`tiny-vdom.ts`) com `h`, `mount`, `useState`, `useEffect`, `useRef`;
+Uma mini-lib **React/Preact-like** super simples (`tiny-vdom.ts`) com `h`, `mount`, `useState`, `useEffect`, `useRef`, `useMemo`, `useCallback`;
 
 ## Requisitos
 
@@ -36,7 +36,7 @@ Também é possível escrever **sem JSX**, usando `h("div", ...)`.
 
 - `h(type, props, ...children)` — cria VNodes (suporta objetos `style`, atributos, e eventos via `onClick`, etc.).
 - `mount(vnode, container)` / `render(vnode, container)` — renderer com diff básico **com suporte a keys** (reconciliação chaveada).
-- Hooks: `useState`, `useEffect`, `useRef`.
+- Hooks: `useState`, `useEffect`, `useRef`, `useMemo`, `useCallback`.
 
 Tipos:
 
