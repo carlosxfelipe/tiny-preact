@@ -1,6 +1,7 @@
 import { h, useEffect, useState } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 import { http } from "@lib/http.ts";
+import FlatList from "@components/FlatList.tsx";
 
 type ApiResult = {
   results: Array<{ name: string; url: string }>;
@@ -12,6 +13,9 @@ type Pokemon = {
   img: string;
 };
 
+const PAGE_SIZE = 25;
+const MAX_ITEMS = 150;
+
 function idFromUrl(url: string): number {
   const m = url.match(/\/pokemon\/(\d+)\/?$/);
   return m ? Number(m[1]) : 0;
@@ -22,9 +26,36 @@ function artUrl(id: number): string {
 }
 
 export default function PokeScreen() {
-  const [list, setList] = useState<Pokemon[] | null>(null);
+  const [list, setList] = useState<Pokemon[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [openId, setOpenId] = useState<number | null>(null);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  async function fetchPage(nextOffset: number, signal: AbortSignal) {
+    const remaining = Math.max(0, MAX_ITEMS - nextOffset);
+    if (remaining === 0) {
+      setHasMore(false);
+      return;
+    }
+    const limit = Math.min(PAGE_SIZE, remaining);
+
+    const { data } = await http.get<ApiResult>(
+      `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${nextOffset}`,
+      { signal }
+    );
+
+    const mapped: Pokemon[] = data.results.map((p) => {
+      const id = idFromUrl(p.url);
+      return { id, name: p.name, img: artUrl(id) };
+    });
+
+    setList((prev) => [...prev, ...mapped]);
+    const newOffset = nextOffset + mapped.length;
+    setOffset(newOffset);
+    if (newOffset >= MAX_ITEMS) setHasMore(false);
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -32,32 +63,35 @@ export default function PokeScreen() {
 
     (async () => {
       try {
-        const { data } = await http.get<ApiResult>(
-          "https://pokeapi.co/api/v2/pokemon?limit=25",
-          { signal }
-        );
-        const mapped: Pokemon[] = data.results.map((p) => {
-          const id = idFromUrl(p.url);
-          return { id, name: p.name, img: artUrl(id) };
-        });
-        setList(mapped);
+        setLoading(true);
+        await fetchPage(0, signal);
       } catch (e) {
-        if ((e as Error).name === "AbortError") return;
-        setError("Falha ao carregar Pokémons. Tente novamente.");
+        if ((e as Error).name !== "AbortError") {
+          setError("Falha ao carregar Pokémons. Tente novamente.");
+        }
+      } finally {
+        setLoading(false);
       }
     })();
 
     return () => controller.abort();
   }, []);
 
-  useEffect(() => {
-    if (openId == null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenId(null);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [openId]);
+  const loadMore = async () => {
+    if (loading || !hasMore) return;
+    const controller = new AbortController();
+    const { signal } = controller;
+    try {
+      setLoading(true);
+      await fetchPage(offset, signal);
+    } catch (e) {
+      if ((e as Error).name !== "AbortError") {
+        setError("Falha ao carregar mais Pokémons.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const open = (id: number) => setOpenId(id);
   const close = () => setOpenId(null);
@@ -65,7 +99,7 @@ export default function PokeScreen() {
   return (
     <section>
       <header style={styles.header}>
-        <h1 style={styles.title}>PokéDex</h1>
+        <h1 style={styles.title}>Pokédex</h1>
         <p style={styles.subtitle}>
           Dados da{" "}
           <a
@@ -81,36 +115,52 @@ export default function PokeScreen() {
 
       {error ? (
         <div style={styles.error}>{error}</div>
-      ) : !list ? (
+      ) : list.length === 0 && loading ? (
         <GridSkeleton />
       ) : (
-        <ul style={styles.grid} aria-live="polite">
-          {list.map((p) => (
-            <li key={p.id} style={styles.card}>
+        <FlatList
+          data={list}
+          renderItem={({ item }) => (
+            <div style={styles.card}>
               <button
                 type="button"
                 style={styles.cardBtn}
-                aria-label={`Ver ${p.name}`}
-                onClick={() => open(p.id)}
+                aria-label={`Ver ${item.name}`}
+                onClick={() => open(item.id)}
               >
                 <div style={styles.thumbWrap}>
                   <img
-                    src={p.img}
+                    src={item.img}
                     alt=""
                     width={160}
                     height={160}
                     style={{
                       ...styles.thumb,
-                      viewTransitionName: `poke-${p.id}`,
+                      viewTransitionName: `poke-${item.id}`,
                     }}
                     loading="lazy"
                   />
                 </div>
-                <span style={styles.name}>{capitalize(p.name)}</span>
+                <span style={styles.name}>{capitalize(item.name)}</span>
               </button>
-            </li>
-          ))}
-        </ul>
+            </div>
+          )}
+          keyExtractor={(p) => p.id}
+          contentContainerStyle={styles.grid as JSX.StyleObject}
+          onEndReached={hasMore ? loadMore : undefined}
+          onEndReachedThreshold={480}
+          loading={loading}
+          horizontal={false}
+          style={{ paddingBottom: 16 }}
+          ListFooterComponent={() =>
+            loading ? (
+              <div style={{ textAlign: "center", padding: 12 }}>
+                Carregando…
+              </div>
+            ) : null
+          }
+          ListEmptyComponent={GridSkeleton}
+        />
       )}
 
       {openId != null ? (
@@ -156,16 +206,16 @@ export default function PokeScreen() {
 
 function GridSkeleton() {
   return (
-    <ul style={styles.grid} aria-hidden="true">
+    <div style={styles.grid} aria-hidden="true">
       {Array.from({ length: 12 }).map((_, i) => (
-        <li key={i} style={styles.card}>
+        <div key={i} style={styles.card}>
           <div style={styles.cardBtn as JSX.StyleObject}>
             <div style={styles.skelImg} />
             <div style={styles.skelText} />
           </div>
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -192,12 +242,12 @@ const styles = StyleSheet.create({
   },
   subtitle: { margin: 0, color: "var(--muted)", fontSize: 14 },
   grid: {
-    listStyle: "none",
-    padding: 0,
-    margin: 0,
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
     gap: 16,
+    listStyle: "none",
+    padding: 0,
+    margin: 0,
   },
   card: {
     border: "1px solid var(--card-border)",
@@ -311,7 +361,7 @@ const styles = StyleSheet.create({
 
 (() => {
   const id = "poke-skel-keyframes";
-  if (!document.getElementById(id)) {
+  if (typeof document !== "undefined" && !document.getElementById(id)) {
     const style = document.createElement("style");
     style.id = id;
     style.textContent = `@keyframes skel {0%{background-position:-120% 0}100%{background-position:220% 0}}`;
