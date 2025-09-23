@@ -65,7 +65,8 @@ export default function PokeScreen() {
     (async () => {
       try {
         setError(null);
-        setLoading(true);
+        const hasCache = !!cacheRef.current[page];
+        if (!hasCache) setLoading(true);
         await fetchPage(page, signal);
       } catch (e) {
         if ((e as Error).name !== "AbortError") {
@@ -94,7 +95,6 @@ export default function PokeScreen() {
   const goPrev = () => {
     if (page > 0 && !loading) {
       const next = page - 1;
-      setPage(next);
       navigate("#/pokedex", { page: next + 1 });
     }
   };
@@ -102,7 +102,6 @@ export default function PokeScreen() {
   const goNext = () => {
     if (page < TOTAL_PAGES - 1 && !loading) {
       const next = page + 1;
-      setPage(next);
       navigate("#/pokedex", { page: next + 1 });
     }
   };
