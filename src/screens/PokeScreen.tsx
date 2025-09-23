@@ -31,7 +31,6 @@ export default function PokeScreen() {
   const [page, setPage] = useState(initialPage);
   const [list, setList] = useState<Pokemon[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [openId, setOpenId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const cacheRef = useRef<Record<number, Pokemon[]>>({});
 
@@ -88,9 +87,6 @@ export default function PokeScreen() {
     globalThis.addEventListener("hashchange", onHash);
     return () => globalThis.removeEventListener("hashchange", onHash);
   }, []);
-
-  const open = (id: number) => setOpenId(id);
-  const close = () => setOpenId(null);
 
   const goPrev = () => {
     if (page > 0 && !loading) {
@@ -158,12 +154,7 @@ export default function PokeScreen() {
         <div style={styles.grid}>
           {list.map((item) => (
             <div key={item.id} style={styles.card}>
-              <button
-                type="button"
-                style={styles.cardBtn}
-                aria-label={`Ver ${item.name}`}
-                onClick={() => open(item.id)}
-              >
+              <div style={styles.cardBtn as JSX.StyleObject}>
                 <div style={styles.thumbWrap}>
                   <img
                     src={item.img}
@@ -178,7 +169,7 @@ export default function PokeScreen() {
                   />
                 </div>
                 <span style={styles.name}>{capitalize(item.name)}</span>
-              </button>
+              </div>
             </div>
           ))}
         </div>
@@ -186,44 +177,6 @@ export default function PokeScreen() {
 
       {loading && list.length > 0 ? (
         <div style={{ textAlign: "center", padding: 12 }}>Carregando…</div>
-      ) : null}
-
-      {openId != null ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Detalhe do Pokémon"
-          style={styles.modalBackdrop}
-          onClick={(e: MouseEvent) => {
-            if (e.target === e.currentTarget) close();
-          }}
-        >
-          <div style={styles.modalCard}>
-            <img
-              src={artUrl(openId)}
-              alt=""
-              width={480}
-              height={480}
-              style={{
-                ...styles.modalImg,
-                viewTransitionName: `poke-${openId}`,
-              }}
-            />
-            <div style={styles.modalFooter}>
-              <span style={styles.badge}>
-                #{String(openId).padStart(3, "0")}
-              </span>
-              <button
-                type="button"
-                style={styles.closeBtn}
-                onClick={close}
-                aria-label="Fechar"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
       ) : null}
     </section>
   );
@@ -310,7 +263,7 @@ const styles = StyleSheet.create({
     background: "transparent",
     border: 0,
     padding: 12,
-    cursor: "pointer",
+    // cursor: "pointer",
     color: "var(--fg)",
   },
   thumbWrap: {
@@ -343,74 +296,4 @@ const styles = StyleSheet.create({
     background: "#00000010",
     borderRadius: 6,
   },
-  modalBackdrop: {
-    position: "fixed",
-    inset: 0,
-    height: "100dvh",
-    background: "rgba(0,0,0,0.35)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "16px",
-    paddingTop: "max(16px, env(safe-area-inset-top))",
-    paddingBottom: "max(16px, env(safe-area-inset-bottom))",
-    paddingLeft: "max(16px, env(safe-area-inset-left))",
-    paddingRight: "max(16px, env(safe-area-inset-right))",
-    zIndex: 1000,
-    overflow: "auto",
-  },
-  modalCard: {
-    width: "min(560px, 96vw)",
-    maxHeight: "min(92dvh, 640px)",
-    background: "var(--card-bg)",
-    border: "1px solid var(--card-border)",
-    borderRadius: 16,
-    boxShadow: "var(--shadow)",
-    padding: 16,
-    overflow: "auto",
-  },
-  modalImg: {
-    width: "100%",
-    height: "auto",
-    display: "block",
-    maxHeight: "60dvh",
-    objectFit: "contain",
-    filter: "drop-shadow(0 10px 30px rgba(0,0,0,0.25))",
-  },
-  modalFooter: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  badge: {
-    display: "inline-block",
-    fontWeight: 700,
-    padding: "4px 8px",
-    borderRadius: 999,
-    background: "var(--btn-bg)",
-    border: "1px solid var(--btn-border)",
-  },
-  closeBtn: {
-    appearance: "none",
-    border: "1px solid var(--btn-border)",
-    background: "var(--btn-bg)",
-    color: "var(--fg)",
-    padding: "8px 12px",
-    borderRadius: 10,
-    fontWeight: 600,
-    cursor: "pointer",
-  },
 });
-
-(() => {
-  const id = "poke-skel-keyframes";
-  if (typeof document !== "undefined" && !document.getElementById(id)) {
-    const style = document.createElement("style");
-    style.id = id;
-    style.textContent = `@keyframes skel {0%{background-position:-120% 0}100%{background-position:220% 0}}`;
-    document.head.appendChild(style);
-  }
-})();
