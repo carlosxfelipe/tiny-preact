@@ -1,0 +1,105 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--card-border);
+  z-index: 100;
+  padding-top: env(safe-area-inset-top);
+}
+
+.nav-inner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  margin: 0 auto;
+  max-width: 1024px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+.nav-brand {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.nav-links {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-link {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.nav-link:hover {
+  background: var(--btn-hover);
+  color: var(--fg);
+  border-color: var(--btn-border);
+}
+
+.nav-link:active {
+  transform: translateY(1px);
+}
+
+.nav-link.active,
+.nav-link[aria-current="page"] {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.nav-link[aria-current="page"]:hover,
+.nav-link.active:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+@media (max-width: 640px) {
+  .nav-inner {
+    height: 56px;
+    gap: 12px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+  .nav-link {
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1;
+  }
+}
+
+@media (hover: none) {
+  .nav-link:hover {
+    background: var(--btn-bg);
+    color: var(--muted);
+    border-color: transparent;
+  }
+  .nav-link[aria-current="page"]:hover,
+  .nav-link.active:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+}
