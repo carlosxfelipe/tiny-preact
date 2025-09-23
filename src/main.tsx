@@ -1,4 +1,4 @@
-import "@styles/styles.css";
+import "@styles/global.css";
 import "@styles/vt.css";
 import { h, mount, useEffect, useState } from "@tiny/tiny-vdom.ts";
 import Layout from "@layout/Layout.tsx";

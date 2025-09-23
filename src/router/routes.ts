@@ -1,12 +1,24 @@
 import {
+  // LoginScreen,
+  // RegisterScreen,
   HomeScreen,
   CounterScreen,
   AboutScreen,
   PokeScreen,
-  LoginScreen,
 } from "@screens/index.ts";
 
 export const ROUTE_DEFS = [
+  // {
+  //   path: "#/" as const,
+  //   component: LoginScreen,
+  //   layout: { fluid: false, navbar: false },
+  // },
+  // {
+  //   path: "#/register" as const,
+  //   component: RegisterScreen,
+  //   layout: { fluid: false, navbar: false },
+  // },
+  // { path: "#/home" as const, component: HomeScreen, layout: { fluid: false } },
   { path: "#/" as const, component: HomeScreen, layout: { fluid: false } },
   {
     path: "#/counter" as const,
@@ -22,11 +34,6 @@ export const ROUTE_DEFS = [
     path: "#/pokedex" as const,
     component: PokeScreen,
     layout: { fluid: true },
-  },
-  {
-    path: "#/login" as const,
-    component: LoginScreen,
-    layout: { fluid: false, navbar: false },
   },
 ] as const;
 
