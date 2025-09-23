@@ -1,6 +1,7 @@
 import { h, useEffect, useRef, useState } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 import { http } from "@lib/http.ts";
+import { getSearch, navigate } from "@src/router/router.ts";
 
 type ApiResult = {
   results: Array<{ name: string; url: string }>;
@@ -26,7 +27,8 @@ function artUrl(id: number): string {
 }
 
 export default function PokeScreen() {
-  const [page, setPage] = useState(0);
+  const initialPage = Math.max(0, (Number(getSearch().get("page")) || 1) - 1);
+  const [page, setPage] = useState(initialPage);
   const [list, setList] = useState<Pokemon[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [openId, setOpenId] = useState<number | null>(null);
@@ -76,8 +78,34 @@ export default function PokeScreen() {
     return () => controller.abort();
   }, [page]);
 
+  useEffect(() => {
+    const onHash = () => {
+      const s = getSearch();
+      const p = Math.max(0, (Number(s.get("page")) || 1) - 1);
+      setPage(p);
+    };
+    globalThis.addEventListener("hashchange", onHash);
+    return () => globalThis.removeEventListener("hashchange", onHash);
+  }, []);
+
   const open = (id: number) => setOpenId(id);
   const close = () => setOpenId(null);
+
+  const goPrev = () => {
+    if (page > 0 && !loading) {
+      const next = page - 1;
+      setPage(next);
+      navigate("#/pokedex", { page: next + 1 });
+    }
+  };
+
+  const goNext = () => {
+    if (page < TOTAL_PAGES - 1 && !loading) {
+      const next = page + 1;
+      setPage(next);
+      navigate("#/pokedex", { page: next + 1 });
+    }
+  };
 
   const canPrev = page > 0 && !loading;
   const canNext = page < TOTAL_PAGES - 1 && !loading;
@@ -103,7 +131,7 @@ export default function PokeScreen() {
         <button
           type="button"
           style={{ ...styles.pagerBtn, opacity: canPrev ? 1 : 0.5 }}
-          onClick={() => canPrev && setPage((p) => Math.max(0, p - 1))}
+          onClick={goPrev}
           disabled={!canPrev}
           aria-label="Página anterior"
         >
@@ -115,9 +143,7 @@ export default function PokeScreen() {
         <button
           type="button"
           style={{ ...styles.pagerBtn, opacity: canNext ? 1 : 0.5 }}
-          onClick={() =>
-            canNext && setPage((p) => Math.min(TOTAL_PAGES - 1, p + 1))
-          }
+          onClick={goNext}
           disabled={!canNext}
           aria-label="Próxima página"
         >

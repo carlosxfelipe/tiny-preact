@@ -8,6 +8,7 @@ export default function Navbar({ currentPath = "#/" }: NavbarProps) {
   const links = [
     { href: "#/", label: "Início" },
     { href: "#/counter", label: "Contador" },
+    { href: "#/pokedex", label: "Pokédex" },
     { href: "#/about", label: "Sobre" },
   ];
 

@@ -65,16 +65,6 @@ export default function AboutScreen() {
             </a>
           </span>
         </li>
-
-        <li style={styles.item}>
-          <Icon name="pokemon-go" size={20} aria-hidden="true" />
-          <span>
-            Quem é fã de Pokémon?{" "}
-            <a href="#/pokedex" class="link">
-              Ir para Pokédex
-            </a>
-          </span>
-        </li>
       </ul>
     </section>
   );
