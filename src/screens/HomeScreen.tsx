@@ -1,6 +1,5 @@
 import { h, useRef } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
-import Icon from "@icons/Icon.tsx";
 
 export default function HomeScreen() {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
@@ -15,10 +14,19 @@ export default function HomeScreen() {
     <section>
       <h1 ref={headingRef}>Bem-vindo ao Tiny-vdom</h1>
       <p>
-        O <strong>Tiny-vdom</strong> é uma mini-lib inspirada em React/Preact,
-        criada para demonstrações e sites estáticos simples. Ele oferece um
-        núcleo enxuto com suporte a <code>h</code>, <code>mount</code>,{" "}
-        <code>useState</code>, <code>useEffect</code>,{" "}
+        O{" "}
+        <a
+          href="https://github.com/carlosxfelipe/tiny-vdom"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link"
+        >
+          <strong>Tiny-vdom</strong>
+        </a>{" "}
+        é uma mini-lib inspirada em React/Preact, criada para demonstrações e
+        sites estáticos simples. Ele oferece um núcleo enxuto com suporte a{" "}
+        <code>h</code>, <code>mount</code>, <code>useState</code>,{" "}
+        <code>useEffect</code>,{" "}
         <code style={{ cursor: "pointer" }} onClick={highlightTitle}>
           useRef
         </code>
@@ -64,18 +72,6 @@ export default function HomeScreen() {
           </li>
         </ul>
       </div>
-
-      <p style={styles.githubLink}>
-        <Icon name="github" size={18} aria-hidden="true" />
-        <a
-          href="https://github.com/carlosxfelipe/tiny-vdom"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="link"
-        >
-          github.com/carlosxfelipe/tiny-vdom
-        </a>
-      </p>
     </section>
   );
 }
@@ -116,10 +112,4 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   featureText: {},
-  githubLink: {
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 12,
-  },
 });
