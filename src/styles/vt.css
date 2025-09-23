@@ -33,3 +33,10 @@
 .vt-exclude {
   view-transition-name: none;
 }
+
+@media (max-width: 768px) and (pointer: coarse) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

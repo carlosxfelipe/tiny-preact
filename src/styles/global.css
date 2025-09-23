@@ -223,3 +223,32 @@ svg {
     border-color: var(--primary);
   }
 }
+
+html,
+body,
+main {
+  background: var(--bg);
+}
+
+main {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: opacity, transform;
+  contain: paint;
+}
+
+[data-screen-root] {
+  contain: paint;
+  content-visibility: auto;
+}
+
+img {
+  content-visibility: auto;
+  contain-intrinsic-size: 160px 160px;
+}
+
+@media (max-width: 640px) {
+  .no-heavy-filter {
+    filter: none !important;
+  }
+}
