@@ -1,6 +1,7 @@
 // src/components/Navbar.tsx
 import { h } from "@tiny/tiny-vdom.ts";
 import Icon from "@icons/Icon.tsx";
+import Logo from "./Logo.tsx";
 
 interface NavbarProps {
   currentPath?: string;
@@ -20,8 +21,8 @@ export default function Navbar({ currentPath = "#/" }: NavbarProps) {
   return (
     <header class="navbar" role="navigation" aria-label="Principal">
       <div class="nav-inner">
-        <a href="#/" class="nav-brand">
-          Tiny-vdom
+        <a href="#/" class="nav-brand" aria-label="Página inicial Tiny-vdom">
+          <Logo height={28} showText />
         </a>
         <nav class="nav-links">
           {links.map(({ href, label, icon }) => (

@@ -33,6 +33,7 @@ interface HookBag {
   effectCleanups: (null | (() => void))[];
   __needsFlush?: boolean;
   __root?: HTMLElement | null; // reserved for potential multi-root support
+  __node?: Node | null; // holds a DOM handle to locate the correct root via closest()
 }
 
 // --- Root state (avoid DOM monkey-patching) ---------------------------------
@@ -469,6 +470,10 @@ function diffComponent(
   newVNode._rendered = norm;
   newVNode.__dom = dom;
   newVNode._hooks = comp;
+
+  // Store a DOM handle so we can find the correct root (multi-root safe).
+  comp.__node = dom ?? null;
+
   queueEffectFlush(comp);
   return dom;
 }
@@ -608,10 +613,17 @@ function flushEffects(_inst: HookBag) {
   /* no-op: effects are flushed asynchronously by scheduleFlush() */
 }
 
-function findRoot(_comp: HookBag): HTMLElement | null {
-  // Returns the first root with [data-tiny-vdom-root]; only a single root is fully supported for state updates
-  const roots = document.querySelectorAll<HTMLElement>("[data-tiny-vdom-root]");
-  return roots[0] || null;
+function findRoot(comp: HookBag): HTMLElement | null {
+  // Find the nearest ancestor root for this component using the stored DOM node.
+  const node = comp.__node as
+    | (Node & { parentElement?: Element | null })
+    | null;
+  const start: Element | null =
+    (node as Element | null) ?? node?.parentElement ?? null;
+
+  const root = start?.closest<HTMLElement>("[data-tiny-vdom-root]") ?? null;
+
+  return root;
 }
 
 // Helper to mount an app quickly. Adds [data-tiny-vdom-root], used by the scheduler to discover roots and flush effects.
