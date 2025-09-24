@@ -7,8 +7,8 @@
 export type Props = Record<string, unknown> & { children?: unknown };
 export type Child = VNode | string | number | boolean | null | undefined;
 export type FC<P = Record<string, unknown>> = (
-  props: P & { children?: Child[] }
-) => VNode | Child;
+  props: P & { children?: Child | Child[] }
+) => VNode | null;
 
 export type Ref<R = Element> = ((el: R | null) => void) | { current: R | null };
 
@@ -470,9 +470,9 @@ type MemoMeta<P> = {
 };
 
 type ForwardRefRenderFunction<P, R = Element> = (
-  props: P & { children?: Child[] },
+  props: P & { children?: Child | Child[] },
   ref: Ref<R> | null
-) => VNode | Child;
+) => VNode | null;
 
 type ForwardRefMeta<P> = {
   __isForwardRef: true;
@@ -500,22 +500,22 @@ function isForwardRefType(
 export function memo<P>(
   Component: FC<P>,
   areEqual?: (
-    prev: Readonly<P & { children?: Child[] }>,
-    next: Readonly<P & { children?: Child[] }>
+    prev: Readonly<P & { children?: Child | Child[] }>,
+    next: Readonly<P & { children?: Child | Child[] }>
   ) => boolean
-): FC<P> & MemoMeta<P & { children?: Child[] }> {
-  const Wrapped: FC<P> & Partial<MemoMeta<P & { children?: Child[] }>> = (
-    props
-  ) => Component(props);
+): FC<P> & MemoMeta<P & { children?: Child | Child[] }> {
+  const Wrapped: FC<P> &
+    Partial<MemoMeta<P & { children?: Child | Child[] }>> = (props) =>
+    Component(props);
   Wrapped.__isMemo = true;
-  Wrapped.__inner = Component as FC<P & { children?: Child[] }>;
+  Wrapped.__inner = Component as FC<P & { children?: Child | Child[] }>;
   Wrapped.__compare =
     areEqual ??
     (shallowEqual as unknown as (
-      a: Readonly<P & { children?: Child[] }>,
-      b: Readonly<P & { children?: Child[] }>
+      a: Readonly<P & { children?: Child | Child[] }>,
+      b: Readonly<P & { children?: Child | Child[] }>
     ) => boolean);
-  return Wrapped as FC<P> & MemoMeta<P & { children?: Child[] }>;
+  return Wrapped as FC<P> & MemoMeta<P & { children?: Child | Child[] }>;
 }
 
 /** forwardRef: pass `ref` as the second argument to the function component */
@@ -583,7 +583,7 @@ function diffComponent(
   CURRENT = comp;
 
   // forwardRef: pass ref as second arg and remove from props object
-  let rendered: VNode | Child;
+  let rendered: VNode | null;
   if (isFwd) {
     const ref = ((newVNode.props as { ref?: Ref | null }).ref ??
       null) as Ref | null;
@@ -591,7 +591,7 @@ function diffComponent(
       string,
       unknown
     >;
-    const refU = ref as unknown as Ref<unknown> | null; // <-- widen to match __inner signature
+    const refU = ref as unknown as Ref<unknown> | null;
     rendered = (
       renderFn as ForwardRefRenderFunction<Record<string, unknown>, unknown>
     )(clean, refU);
@@ -601,15 +601,14 @@ function diffComponent(
 
   CURRENT = null;
   comp.hookIndex = 0;
-  const norm = normalize(rendered as Child);
   const dom = diff(
     parent,
     oldVNode?._rendered ?? null,
-    norm,
+    rendered,
     _inst,
     nextSibling
   );
-  newVNode._rendered = norm;
+  newVNode._rendered = rendered;
   newVNode.__dom = dom;
   newVNode._hooks = comp;
   newVNode._propsWC = propsWC;
@@ -693,14 +692,13 @@ export function useMemo<T>(factory: () => T, deps?: readonly unknown[]): T {
 
   const changed =
     !prev ||
-    !deps || // if deps is undefined, recompute every render (React-compatible behavior)
-    prev.deps?.length !== deps.length || // different length means deps changed
-    deps.some((d, idx) => !Object.is(d, prev.deps?.[idx])); // shallow compare each dep
+    !deps ||
+    prev.deps?.length !== deps.length ||
+    deps.some((d, idx) => !Object.is(d, prev.deps?.[idx]));
 
   if (changed) {
     const value = factory();
     if (prev) {
-      // Reuse the same slot object to avoid creating a new one
       prev.deps = deps;
       prev.value = value;
       comp.hooks[i] = prev;
@@ -716,7 +714,6 @@ export function useCallback<T extends (...args: unknown[]) => unknown>(
   fn: T,
   deps?: readonly unknown[]
 ): T {
-  // useCallback is just useMemo that returns the function
   return useMemo(() => fn, deps) as T;
 }
 
