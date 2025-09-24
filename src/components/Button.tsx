@@ -1,4 +1,4 @@
-import { h, useState } from "@tiny/tiny-vdom.ts";
+import { h, useReducer, forwardRef } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 
 type Variant = "default" | "primary" | "danger";
@@ -11,68 +11,92 @@ interface ButtonProps {
   type?: "button" | "submit" | "reset";
 }
 
-export default function Button({
-  children,
-  variant = "default",
-  ariaLabel,
-  onClick,
-  type = "button",
-}: ButtonProps) {
-  const [hover, setHover] = useState(false);
-  const [active, setActive] = useState(false);
-  const [focus, setFocus] = useState(false);
+type State = { hover: boolean; active: boolean; focus: boolean };
 
-  const base = styles.button;
+type Action =
+  | { type: "HOVER"; value: boolean }
+  | { type: "ACTIVE"; value: boolean }
+  | { type: "FOCUS"; value: boolean };
 
-  const byVariant =
-    variant === "primary"
-      ? styles.buttonPrimary
-      : variant === "danger"
-      ? styles.buttonDanger
-      : {};
-
-  const byHover =
-    variant === "primary"
-      ? styles.buttonPrimaryHover
-      : variant === "danger"
-      ? styles.buttonDangerHover
-      : styles.buttonHover;
-
-  const byActive =
-    variant === "primary"
-      ? styles.buttonPrimaryActive
-      : variant === "danger"
-      ? styles.buttonDangerActive
-      : styles.buttonActive;
-
-  const style = {
-    ...base,
-    ...byVariant,
-    ...(hover ? byHover : {}),
-    ...(active ? byActive : {}),
-    ...(focus ? styles.buttonFocus : {}),
-  };
-
-  return (
-    <button
-      type={type}
-      aria-label={ariaLabel}
-      onClick={onClick}
-      style={style}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => {
-        setHover(false);
-        setActive(false);
-      }}
-      onMouseDown={() => setActive(true)}
-      onMouseUp={() => setActive(false)}
-      onFocus={() => setFocus(true)}
-      onBlur={() => setFocus(false)}
-    >
-      {children}
-    </button>
-  );
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "HOVER":
+      return { ...state, hover: action.value };
+    case "ACTIVE":
+      return { ...state, active: action.value };
+    case "FOCUS":
+      return { ...state, focus: action.value };
+    default:
+      return state;
+  }
 }
+
+const Button = forwardRef<ButtonProps, HTMLButtonElement>(
+  (
+    { children, variant = "default", ariaLabel, onClick, type = "button" },
+    ref
+  ) => {
+    const [state, dispatch] = useReducer(reducer, {
+      hover: false,
+      active: false,
+      focus: false,
+    });
+
+    const base = styles.button;
+
+    const byVariant =
+      variant === "primary"
+        ? styles.buttonPrimary
+        : variant === "danger"
+        ? styles.buttonDanger
+        : {};
+
+    const byHover =
+      variant === "primary"
+        ? styles.buttonPrimaryHover
+        : variant === "danger"
+        ? styles.buttonDangerHover
+        : styles.buttonHover;
+
+    const byActive =
+      variant === "primary"
+        ? styles.buttonPrimaryActive
+        : variant === "danger"
+        ? styles.buttonDangerActive
+        : styles.buttonActive;
+
+    const style = {
+      ...base,
+      ...byVariant,
+      ...(state.hover ? byHover : {}),
+      ...(state.active ? byActive : {}),
+      ...(state.focus ? styles.buttonFocus : {}),
+    };
+
+    return (
+      <button
+        ref={ref}
+        type={type}
+        aria-label={ariaLabel}
+        onClick={onClick}
+        style={style}
+        onMouseEnter={() => dispatch({ type: "HOVER", value: true })}
+        onMouseLeave={() => {
+          dispatch({ type: "HOVER", value: false });
+          dispatch({ type: "ACTIVE", value: false });
+        }}
+        onMouseDown={() => dispatch({ type: "ACTIVE", value: true })}
+        onMouseUp={() => dispatch({ type: "ACTIVE", value: false })}
+        onFocus={() => dispatch({ type: "FOCUS", value: true })}
+        onBlur={() => dispatch({ type: "FOCUS", value: false })}
+      >
+        {children}
+      </button>
+    );
+  }
+);
+
+export default Button;
 
 const styles = StyleSheet.create({
   button: {

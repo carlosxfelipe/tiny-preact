@@ -26,11 +26,12 @@ export default function HomeScreen() {
         é uma mini-lib inspirada em React/Preact, criada para demonstrações e
         sites estáticos simples. Ele oferece um núcleo enxuto com suporte a{" "}
         <code>h</code>, <code>mount</code>, <code>useState</code>,{" "}
-        <code>useEffect</code>,{" "}
+        <code>useReducer</code>, <code>useEffect</code>,{" "}
         <code style={{ cursor: "pointer" }} onClick={highlightTitle}>
           useRef
         </code>
-        , <code>useMemo</code> e <code>useCallback</code>.
+        , <code>useMemo</code>, <code>useCallback</code>, <code>memo</code> e{" "}
+        <code>forwardRef</code>.
       </p>
       <p>
         A proposta é permitir a criação de componentes reativos com JSX

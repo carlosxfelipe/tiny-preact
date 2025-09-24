@@ -6,7 +6,7 @@ https://tiny-vdom.netlify.app/
   <img src="./tiny-vdom-logo-transparent-252px.png" alt="Tiny-vdom logo" width="100%" />
 </p>
 
-Uma mini-lib **React/Preact-like** super simples (`tiny-vdom.ts`) com `h`, `mount`, `useState`, `useEffect`, `useRef`, `useMemo`, `useCallback`;
+Uma mini-lib **React/Preact-like** super simples (`tiny-vdom.ts`) com `h`, `mount`, `useState`, `useReducer`, `useEffect`, `useRef`, `useMemo`, `useCallback`, `memo` e `forwardRef`.
 
 ## Requisitos
 

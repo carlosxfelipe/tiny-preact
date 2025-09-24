@@ -10,6 +10,8 @@ export type FC<P = Record<string, unknown>> = (
   props: P & { children?: Child[] }
 ) => VNode | Child;
 
+export type Ref<R = Element> = ((el: R | null) => void) | { current: R | null };
+
 export interface VNode {
   type: string | typeof TEXT | FC<unknown>;
   props: Props;
@@ -17,6 +19,8 @@ export interface VNode {
   __dom?: Node | null;
   _rendered?: VNode | null;
   _hooks?: HookBag | null;
+  /** Store props+children for memo comparisons in a single stable object */
+  _propsWC?: Record<string, unknown> | null;
 }
 
 interface TextVNode extends VNode {
@@ -439,6 +443,92 @@ function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
 // --- Components & Hooks ----------------------------------------------------
 let CURRENT: HookBag | null = null;
 
+/** Narrow unknown to a plain object record (non-null) */
+function isObjectRecord(x: unknown): x is Record<string, unknown> {
+  return typeof x === "object" && x !== null;
+}
+
+/** Default shallow equality for memo */
+function shallowEqual(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (!isObjectRecord(a) || !isObjectRecord(b)) return false;
+  const ak = Object.keys(a),
+    bk = Object.keys(b);
+  if (ak.length !== bk.length) return false;
+  for (const k of ak) {
+    if (!Object.prototype.hasOwnProperty.call(b, k)) return false;
+    if (!Object.is(a[k], (b as Record<string, unknown>)[k])) return false;
+  }
+  return true;
+}
+
+/** Metadata types for memo/forwardRef */
+type MemoMeta<P> = {
+  __isMemo: true;
+  __compare: (prev: Readonly<P>, next: Readonly<P>) => boolean;
+  __inner: FC<P>;
+};
+
+type ForwardRefRenderFunction<P, R = Element> = (
+  props: P & { children?: Child[] },
+  ref: Ref<R> | null
+) => VNode | Child;
+
+type ForwardRefMeta<P> = {
+  __isForwardRef: true;
+  __inner: ForwardRefRenderFunction<P, unknown>;
+};
+
+type MaybeMemoOrFwd = FC<unknown> &
+  Partial<MemoMeta<Record<string, unknown>>> &
+  Partial<ForwardRefMeta<Record<string, unknown>>>;
+
+function isMemoType(
+  x: unknown
+): x is FC<unknown> & MemoMeta<Record<string, unknown>> {
+  return isObjectRecord(x) && (x as Record<string, unknown>).__isMemo === true;
+}
+function isForwardRefType(
+  x: unknown
+): x is FC<unknown> & ForwardRefMeta<Record<string, unknown>> {
+  return (
+    isObjectRecord(x) && (x as Record<string, unknown>).__isForwardRef === true
+  );
+}
+
+/** memo: skip re-render when props (including children) are equal */
+export function memo<P>(
+  Component: FC<P>,
+  areEqual?: (
+    prev: Readonly<P & { children?: Child[] }>,
+    next: Readonly<P & { children?: Child[] }>
+  ) => boolean
+): FC<P> & MemoMeta<P & { children?: Child[] }> {
+  const Wrapped: FC<P> & Partial<MemoMeta<P & { children?: Child[] }>> = (
+    props
+  ) => Component(props);
+  Wrapped.__isMemo = true;
+  Wrapped.__inner = Component as FC<P & { children?: Child[] }>;
+  Wrapped.__compare =
+    areEqual ??
+    (shallowEqual as unknown as (
+      a: Readonly<P & { children?: Child[] }>,
+      b: Readonly<P & { children?: Child[] }>
+    ) => boolean);
+  return Wrapped as FC<P> & MemoMeta<P & { children?: Child[] }>;
+}
+
+/** forwardRef: pass `ref` as the second argument to the function component */
+export function forwardRef<P, R = Element>(
+  render: ForwardRefRenderFunction<P, R>
+): FC<P> & ForwardRefMeta<P> {
+  const Wrapped: FC<P> & Partial<ForwardRefMeta<P>> = (props) =>
+    render(props, (props as unknown as { ref?: Ref<R> | null }).ref ?? null);
+  Wrapped.__isForwardRef = true;
+  Wrapped.__inner = render as ForwardRefRenderFunction<P, unknown>;
+  return Wrapped as FC<P> & ForwardRefMeta<P>;
+}
+
 function diffComponent(
   parent: HTMLElement,
   oldVNode: VNode | null,
@@ -446,6 +536,44 @@ function diffComponent(
   _inst: HookBag,
   nextSibling: Node | null
 ): Node | null {
+  // Detect memo/forwardRef
+  const compType = newVNode.type as MaybeMemoOrFwd;
+  const isMemo = isMemoType(compType);
+  const isFwd = isForwardRefType(compType);
+
+  // Resolve actual render function
+  const renderFn: unknown = isMemo
+    ? compType.__inner
+    : isFwd
+    ? compType.__inner
+    : compType;
+
+  // Build props + children (stable shape for comparison)
+  const propsWC = {
+    ...(newVNode.props || {}),
+    children: newVNode.children,
+  } as Record<string, unknown>;
+
+  // If memo and we have a previous VNode, compare props
+  if (isMemo && oldVNode) {
+    const prevPropsWC = oldVNode._propsWC ?? {
+      ...(oldVNode.props || {}),
+      children: oldVNode.children,
+    };
+    const equal = compType.__compare(
+      prevPropsWC as Readonly<Record<string, unknown>>,
+      propsWC as Readonly<Record<string, unknown>>
+    );
+    if (equal) {
+      newVNode._rendered = oldVNode._rendered ?? null;
+      newVNode.__dom = oldVNode.__dom ?? null;
+      newVNode._hooks = oldVNode._hooks ?? null;
+      newVNode._propsWC = prevPropsWC;
+      return newVNode.__dom ?? null;
+    }
+  }
+
+  // Prepare component hook bag
   const comp: HookBag = {
     hooks: oldVNode?._hooks?.hooks ?? [],
     hookIndex: 0,
@@ -453,10 +581,24 @@ function diffComponent(
     effectCleanups: oldVNode?._hooks?.effectCleanups ?? [],
   };
   CURRENT = comp;
-  const rendered = (newVNode.type as FC<unknown>)({
-    ...(newVNode.props || {}),
-    children: newVNode.children,
-  });
+
+  // forwardRef: pass ref as second arg and remove from props object
+  let rendered: VNode | Child;
+  if (isFwd) {
+    const ref = ((newVNode.props as { ref?: Ref | null }).ref ??
+      null) as Ref | null;
+    const { ref: _omit, ...clean } = propsWC as { ref?: unknown } & Record<
+      string,
+      unknown
+    >;
+    const refU = ref as unknown as Ref<unknown> | null; // <-- widen to match __inner signature
+    rendered = (
+      renderFn as ForwardRefRenderFunction<Record<string, unknown>, unknown>
+    )(clean, refU);
+  } else {
+    rendered = (renderFn as FC<Record<string, unknown>>)(propsWC);
+  }
+
   CURRENT = null;
   comp.hookIndex = 0;
   const norm = normalize(rendered as Child);
@@ -470,6 +612,7 @@ function diffComponent(
   newVNode._rendered = norm;
   newVNode.__dom = dom;
   newVNode._hooks = comp;
+  newVNode._propsWC = propsWC;
 
   // Store a DOM handle so we can find the correct root (multi-root safe).
   comp.__node = dom ?? null;
@@ -499,6 +642,19 @@ export function useState<S>(
     }
   };
   return [comp.hooks[i] as S, setState];
+}
+
+export function useReducer<S, A>(
+  reducer: (state: S, action: A) => S,
+  initialArg: S | (() => S)
+): [S, (action: A) => void] {
+  const [state, setState] = useState<S>(
+    typeof initialArg === "function" ? (initialArg as () => S)() : initialArg
+  );
+  const dispatch = (action: A) => {
+    setState((prev) => reducer(prev, action));
+  };
+  return [state, dispatch];
 }
 
 export function useEffect(
@@ -561,7 +717,7 @@ export function useCallback<T extends (...args: unknown[]) => unknown>(
   deps?: readonly unknown[]
 ): T {
   // useCallback is just useMemo that returns the function
-  return useMemo(() => fn, deps);
+  return useMemo(() => fn, deps) as T;
 }
 
 // --- Effects ---------------------------------------------------------------
@@ -587,7 +743,7 @@ function scheduleFlush() {
           for (const e of v._hooks.effects) {
             if (v._hooks.effectCleanups[e.i]) {
               try {
-                v._hooks.effectCleanups[e.i]!(/* cleanup */);
+                v._hooks.effectCleanups[e.i]!();
               } catch {}
             }
             try {
@@ -620,9 +776,7 @@ function findRoot(comp: HookBag): HTMLElement | null {
     | null;
   const start: Element | null =
     (node as Element | null) ?? node?.parentElement ?? null;
-
   const root = start?.closest<HTMLElement>("[data-tiny-vdom-root]") ?? null;
-
   return root;
 }
 
@@ -649,9 +803,12 @@ const tiny = {
   render,
   mount,
   useState,
+  useReducer,
   useEffect,
   useRef,
   useMemo,
   useCallback,
+  memo,
+  forwardRef,
 };
 export default tiny;
