@@ -4,10 +4,10 @@
 # Deno lockfile
 deno.lock
 
-# Saída do bundle
+# Build output
 dist/
 
-# Arquivos temporários / editores
+# Temporary files / editors
 *.log
 *.swp
 *.swo
