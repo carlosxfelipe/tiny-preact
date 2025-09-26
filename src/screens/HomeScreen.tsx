@@ -73,6 +73,21 @@ export default function HomeScreen() {
           </li>
         </ul>
       </div>
+      <p>
+        Paralelamente, também estou desenvolvendo um segundo projeto, o{" "}
+        <a
+          href="https://github.com/carlosxfelipe/tiny-signals"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link"
+        >
+          <strong>Tiny-signals</strong>
+        </a>
+        , que segue uma proposta mais próxima do SolidJS. Diferente do
+        <em> Tiny-vdom</em>, ele não utiliza virtual DOM, mas sim um modelo
+        reativo baseado em sinais, garantindo atualizações diretas e altamente
+        performáticas no DOM real.
+      </p>
     </section>
   );
 }
