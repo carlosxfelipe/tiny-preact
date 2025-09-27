@@ -4,7 +4,7 @@ import Button from "@components/Button.tsx";
 import Icon from "@icons/Icon.tsx";
 import { navigate } from "@src/router/router.ts";
 
-export default function RegisterScreen() {
+export default function RegisterPage() {
   const [show1, setShow1] = useState(false);
   const [show2, setShow2] = useState(false);
 

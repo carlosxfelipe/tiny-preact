@@ -4,7 +4,7 @@ import Button from "@components/Button.tsx";
 import Icon from "@icons/Icon.tsx";
 import { navigate } from "@src/router/router.ts";
 
-export default function LoginScreen() {
+export default function LoginPage() {
   const [show, setShow] = useState(false);
   const [remember, setRemember] = useState(false);
   const emailRef = useRef<HTMLInputElement | null>(null);
@@ -17,8 +17,8 @@ export default function LoginScreen() {
     <section class="auth-wrap">
       <div class="auth-card">
         <div class="auth-form-side">
-          <h1 class="auth-title">Bem-vindo de volta</h1>
-          <p class="auth-subtitle">Entre para continuar</p>
+          <h1 class="auth-title">Acesse sua conta</h1>
+          <p class="auth-subtitle">Use seu e-mail e senha</p>
 
           <form onSubmit={onSubmit} class="auth-form">
             <div class="auth-field">

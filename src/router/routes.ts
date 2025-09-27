@@ -1,21 +1,21 @@
 import {
-  LoginScreen,
-  RegisterScreen,
+  LoginPage,
+  RegisterPage,
   HomeScreen,
   CounterScreen,
   AboutScreen,
   PokeScreen,
-} from "@screens/index.ts";
+} from "@pages/index.ts";
 
 export const ROUTE_DEFS = [
   {
     path: "#/login" as const,
-    component: LoginScreen,
+    component: LoginPage,
     layout: { fluid: false, navbar: false },
   },
   {
     path: "#/register" as const,
-    component: RegisterScreen,
+    component: RegisterPage,
     layout: { fluid: false, navbar: false },
   },
   { path: "#/" as const, component: HomeScreen, layout: { fluid: false } },
