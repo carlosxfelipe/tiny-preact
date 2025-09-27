@@ -1,9 +1,12 @@
 import { navigate as vtNavigate, setTransitionScope } from "@lib/vt.ts";
 import { ROUTE_DEFS, ROUTES } from "./routes.ts";
 import type { Route } from "./routes.ts";
+import { save, restore } from "./scroll.ts";
 
 export { ROUTES };
 export type { Route };
+
+let CURRENT: Route = getRoute();
 
 export function getRoute(): Route {
   const h = globalThis.location?.hash || "#/";
@@ -24,10 +27,16 @@ export function getSearch(): URLSearchParams {
 export function attachRouter(setRoute: (r: Route) => void): () => void {
   const onHash = () => {
     const next = getRoute();
+    const prev = CURRENT;
     vtNavigate(() => {
       const main = document.querySelector("main");
       if (main) setTransitionScope(main, "page");
+      save(prev);
       setRoute(next);
+      CURRENT = next;
+      queueMicrotask(() =>
+        requestAnimationFrame(() => requestAnimationFrame(() => restore(next)))
+      );
     });
   };
   globalThis.addEventListener("hashchange", onHash);
@@ -46,6 +55,7 @@ export function navigate(
     : "";
   const next = qs ? `${base}?${qs}` : base;
   if (globalThis.location?.hash !== "#" + next) {
+    save(CURRENT);
     vtNavigate(() => {
       globalThis.location.hash = next;
     });
