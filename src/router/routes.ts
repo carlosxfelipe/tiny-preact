@@ -1,10 +1,10 @@
 import {
   LoginPage,
   RegisterPage,
-  HomeScreen,
-  CounterScreen,
-  AboutScreen,
-  PokeScreen,
+  HomePage,
+  CounterPage,
+  AboutPage,
+  PokePage,
 } from "@pages/index.ts";
 
 export const ROUTE_DEFS = [
@@ -18,20 +18,20 @@ export const ROUTE_DEFS = [
     component: RegisterPage,
     layout: { fluid: false, navbar: false },
   },
-  { path: "#/" as const, component: HomeScreen, layout: { fluid: false } },
+  { path: "#/" as const, component: HomePage, layout: { fluid: false } },
   {
     path: "#/counter" as const,
-    component: CounterScreen,
+    component: CounterPage,
     layout: { fluid: false },
   },
   {
     path: "#/about" as const,
-    component: AboutScreen,
+    component: AboutPage,
     layout: { fluid: false },
   },
   {
     path: "#/pokedex" as const,
-    component: PokeScreen,
+    component: PokePage,
     layout: { fluid: true },
   },
 ] as const;

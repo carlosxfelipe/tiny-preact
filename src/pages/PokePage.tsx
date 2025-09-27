@@ -26,7 +26,7 @@ function artUrl(id: number): string {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 }
 
-export default function PokeScreen() {
+export default function PokePage() {
   const initialPage = Math.max(0, (Number(getSearch().get("page")) || 1) - 1);
   const [page, setPage] = useState(initialPage);
   const [list, setList] = useState<Pokemon[]>([]);

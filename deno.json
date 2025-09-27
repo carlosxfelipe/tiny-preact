@@ -28,6 +28,7 @@
     "@icons/": "./src/icons/",
     "@pages/": "./src/pages/",
     "@styles/": "./src/styles/",
-    "@utils/": "./src/utils/"
+    "@utils/": "./src/utils/",
+    "@store/": "./src/store/"
   }
 }

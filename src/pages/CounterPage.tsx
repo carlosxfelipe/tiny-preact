@@ -2,10 +2,10 @@ import { h, useEffect } from "@tiny/tiny-vdom.ts";
 import Icon from "@icons/Icon.tsx";
 import Button from "@components/Button.tsx";
 import { StyleSheet } from "@styles/stylesheet.ts";
-import { useCounter } from "@src/store/counter.ts";
+import { useCounter } from "@store/counter.ts";
 // import { hello } from "@utils/hello.ts";
 
-export default function CounterScreen() {
+export default function CounterPage() {
   const n = useCounter((s) => s.count);
   const inc = useCounter((s) => s.inc);
   const dec = useCounter((s) => s.dec);

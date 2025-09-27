@@ -2,7 +2,7 @@ import { h } from "@tiny/tiny-vdom.ts";
 import Icon from "@icons/Icon.tsx";
 import { StyleSheet } from "@styles/stylesheet.ts";
 
-export default function AboutScreen() {
+export default function AboutPage() {
   return (
     <section>
       <div>

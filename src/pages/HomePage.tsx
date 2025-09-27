@@ -1,7 +1,7 @@
 import { h, useRef } from "@tiny/tiny-vdom.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 
-export default function HomeScreen() {
+export default function HomePage() {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
 
   function highlightTitle() {

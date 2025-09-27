@@ -1,6 +1,6 @@
 export { default as LoginPage } from "./LoginPage.tsx.tsx";
 export { default as RegisterPage } from "./RegisterPage.tsx";
-export { default as HomeScreen } from "./HomeScreen.tsx";
-export { default as CounterScreen } from "./CounterScreen.tsx";
-export { default as AboutScreen } from "./AboutScreen.tsx";
-export { default as PokeScreen } from "./PokeScreen.tsx";
+export { default as HomePage } from "./HomePage.tsx";
+export { default as CounterPage } from "./CounterPage.tsx";
+export { default as AboutPage } from "./AboutPage.tsx";
+export { default as PokePage } from "./PokePage.tsx";

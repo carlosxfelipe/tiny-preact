@@ -50,9 +50,3 @@ Tipos:
 Este projeto é licenciado sob os termos da **GNU General Public License v3.0 or later**.
 
 Você pode acessar a licença diretamente [aqui](https://www.gnu.org/licenses/gpl-3.0.txt).
-
----
-
-> Projeto desenvolvido com ❤️ por
-> [@carlosxfelipe](https://github.com/carlosxfelipe). Contribuições são
-> bem-vindas!
