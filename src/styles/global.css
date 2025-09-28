@@ -145,3 +145,58 @@ main {
     filter: none !important;
   }
 }
+
+input,
+textarea,
+select {
+  background: var(--card-bg);
+  color: var(--fg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: var(--btn-border);
+  background: var(--btn-hover);
+}
+
+input:active,
+textarea:active,
+select:active {
+  background: var(--btn-active);
+}
+
+input[disabled],
+textarea[disabled],
+select[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--fg);
+  transition: background-color 9999s ease-out 0s;
+  box-shadow: 0 0 0 1000px var(--card-bg) inset;
+}
