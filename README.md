@@ -81,7 +81,7 @@ Também é possível escrever **sem JSX**, usando `h("div", ...)`.
 - `mount(vnode, container)` / `render(vnode, container)` — renderer com diff básico **com suporte a keys** (reconciliação chaveada).
 - Hooks: `useState`, `useEffect`, `useRef`, `useMemo`, `useCallback`.
 
-Tipos:
+### Tipos
 
 - `JSX.Element` é mapeado para `VNode` via `tiny-vdom/jsx.d.ts`.
 - `JSX.IntrinsicElements` é aberto como um índice (`Record<string, unknown>`) para permitir tags HTML e atributos comuns.

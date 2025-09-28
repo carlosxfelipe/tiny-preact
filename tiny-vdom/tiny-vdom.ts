@@ -91,6 +91,7 @@ function unmount(v: VNode | null) {
     for (const cl of hooks.effectCleanups) {
       try {
         cl?.();
+        // deno-lint-ignore no-empty
       } catch {}
     }
     hooks.effectCleanups = [];
@@ -738,10 +739,12 @@ function scheduleFlush() {
             if (v._hooks.effectCleanups[e.i]) {
               try {
                 v._hooks.effectCleanups[e.i]!();
+                // deno-lint-ignore no-empty
               } catch {}
             }
             try {
               v._hooks.effectCleanups[e.i] = e.effect() || null;
+              // deno-lint-ignore no-empty
             } catch {}
           }
           v._hooks.effects = [];
