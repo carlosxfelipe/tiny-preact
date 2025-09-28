@@ -8,6 +8,53 @@ Uma mini-lib **React/Preact-like** super simples (`tiny-vdom.ts`) com `h`, `moun
 
 - Deno 2.5 ou superior (`deno --version`)
 
+## Instalação
+
+Instale o runtime do **Deno** no seu sistema usando um dos comandos abaixo.  
+Há diversas maneiras de instalar o Deno — uma lista completa pode ser encontrada [aqui](https://docs.deno.com/runtime/manual/getting_started/installation).
+
+### Shell (Mac, Linux)
+
+```sh
+curl -fsSL https://deno.land/install.sh | sh
+```
+
+### PowerShell (Windows)
+
+```powershell
+irm https://deno.land/install.ps1 | iex
+```
+
+### [Homebrew](https://formulae.brew.sh/formula/deno) (Mac)
+
+```sh
+brew install deno
+```
+
+### [Chocolatey](https://chocolatey.org/packages/deno) (Windows)
+
+```powershell
+choco install deno
+```
+
+### [WinGet](https://winstall.app/apps/DenoLand.Deno) (Windows)
+
+```powershell
+winget install --id=DenoLand.Deno
+```
+
+## Extensão para VSCode
+
+Recomenda-se instalar a extensão [**Deno for VSCode (denoland.vscode-deno)**](https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno).
+
+### Benefícios da extensão:
+
+- **Suporte a TypeScript e JSX:** fornece tipagem aprimorada e melhor autocompletar.  
+- **Linting e formatação automática:** ajuda a manter um padrão de código consistente.  
+- **Execução integrada:** permite rodar e depurar projetos Deno diretamente do VSCode.  
+- **Importações otimizadas:** detecta módulos de forma nativa, simplificando o desenvolvimento.  
+- **Melhor experiência com hooks e JSX do tiny-vdom:** aumenta a produtividade no uso da mini-lib.
+
 ## Começo rápido
 
 ```bash

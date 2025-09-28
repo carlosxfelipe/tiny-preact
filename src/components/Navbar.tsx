@@ -1,4 +1,3 @@
-// src/components/Navbar.tsx
 import { h } from "@tiny/tiny-vdom.ts";
 import Icon from "@icons/Icon.tsx";
 import Logo from "./Logo.tsx";

@@ -1,7 +1,4 @@
 // tiny-vdom.ts — a tiny React/Preact-like library in one file (TypeScript)
-// Features: h() (createElement), render()/mount(), basic diffing, and useState/useEffect/useRef for function components.
-// No dependencies. Requires DOM APIs (document/HTMLElement): works in browsers, Deno with DOM enabled, and via CDNs.
-// JSX supported in “classic” mode via `@jsx h` or `compilerOptions.jsxFactory: "h"`.
 
 // --- Types ------------------------------------------------------------------
 export type Props = Record<string, unknown> & { children?: unknown };
