@@ -130,14 +130,12 @@ img {
 
 main {
   backface-visibility: hidden;
-  contain: paint;
   transform: translateZ(0);
   will-change: opacity, transform;
 }
 
 [data-screen-root] {
-  contain: paint;
-  content-visibility: auto;
+  content-visibility: visible;
 }
 
 @media (max-width: 640px) {
