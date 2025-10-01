@@ -25,14 +25,14 @@ export const ROUTE_DEFS = [
     layout: { fluid: false },
   },
   {
-    path: "#/about" as const,
-    component: AboutPage,
-    layout: { fluid: false },
-  },
-  {
     path: "#/pokedex" as const,
     component: PokePage,
     layout: { fluid: true },
+  },
+  {
+    path: "#/about" as const,
+    component: AboutPage,
+    layout: { fluid: false },
   },
 ] as const;
 
