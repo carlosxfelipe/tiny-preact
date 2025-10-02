@@ -1,4 +1,4 @@
-import { h } from "@tiny/tiny-vdom.ts";
+import { h } from "@tiny/core.ts";
 
 type LogoProps = {
   height?: number | string;

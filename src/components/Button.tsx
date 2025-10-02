@@ -1,4 +1,4 @@
-import { h, useReducer, forwardRef } from "@tiny/tiny-vdom.ts";
+import { h, useReducer, forwardRef } from "@tiny/core.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 
 type Variant = "default" | "primary" | "danger";
