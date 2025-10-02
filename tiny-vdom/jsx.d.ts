@@ -1,4 +1,4 @@
-import type { VNode } from "./core.ts";
+import type { VNode } from "./vdom";
 
 export {};
 

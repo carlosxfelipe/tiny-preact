@@ -1,91 +1,24 @@
-// tiny-vdom.ts — a tiny React/Preact-like library in one file (TypeScript)
+import {
+  TEXT,
+  SVG_NS,
+  h,
+  type VNode,
+  type Props,
+  type FC,
+  type Ref,
+  getKey,
+  isSameType,
+  type HookBag,
+} from "./vdom.ts";
+import { updateProps } from "./dom.ts";
 
-// --- Types ------------------------------------------------------------------
-export type Props = Record<string, unknown> & { children?: unknown };
-export type Child = VNode | string | number | boolean | null | undefined;
-export type FC<P = Record<string, unknown>> = (
-  props: P & { children?: Child | Child[] }
-) => VNode | null;
-
-export type Ref<R = Element> = ((el: R | null) => void) | { current: R | null };
-
-export interface VNode {
-  type: string | typeof TEXT | FC<unknown>;
-  props: Props;
-  children: (VNode | null)[];
-  __dom?: Node | null;
-  _rendered?: VNode | null;
-  _hooks?: HookBag | null;
-  /** Store props+children for memo comparisons in a single stable object */
-  _propsWC?: Record<string, unknown> | null;
-}
-
-interface TextVNode extends VNode {
-  type: typeof TEXT;
-  props: { nodeValue: string };
-}
-
-type HookEffect = { i: number; effect: () => void | (() => void) };
-
-interface HookBag {
-  hooks: unknown[];
-  hookIndex: number;
-  effects: HookEffect[];
-  effectCleanups: (null | (() => void))[];
-  __needsFlush?: boolean;
-  __root?: HTMLElement | null; // reserved for potential multi-root support
-  __node?: Node | null; // holds a DOM handle to locate the correct root via closest()
-}
-
-// --- Root state (avoid DOM monkey-patching) ---------------------------------
 const ROOT_VNODE = new WeakMap<HTMLElement, VNode | null>();
 const ROOT_INST = new WeakMap<HTMLElement, HookBag>();
 
-// --- VNode factory ----------------------------------------------------------
-export function h(
-  type: VNode["type"],
-  props: Props | null,
-  ...children: Child[]
-): VNode {
-  props ||= {};
-  const flat: Child[] = [];
-  (function flatPush(arr: Child[]) {
-    for (const c of arr)
-      Array.isArray(c) ? flatPush(c as Child[]) : flat.push(c);
-  })(children);
-  return { type, props, children: flat.map(normalize) } as VNode;
-}
-
-function normalize(node: Child): VNode | null {
-  if (node == null || node === false || node === true) return null;
-  if (typeof node === "object" && (node as VNode)?.type) return node as VNode;
-  return {
-    type: TEXT,
-    props: { nodeValue: String(node) },
-    children: [],
-  } as TextVNode;
-}
-
-const TEXT = Symbol("text");
-const SVG_NS = "http://www.w3.org/2000/svg";
-
-// Keyed reconciliation helpers
-function getKey(v: VNode | null): unknown {
-  return (v?.props as { key?: unknown })?.key;
-}
-function isSameType(a: VNode | null, b: VNode | null): boolean {
-  if (!a || !b) return false;
-  return a.type === b.type;
-}
-
-// --- Unmount & cleanup ------------------------------------------------------
 function unmount(v: VNode | null) {
   if (!v) return;
-  // unmount subtree first
   if (v._rendered) unmount(v._rendered);
   for (const c of v.children) if (c) unmount(c);
-
-  // run effect cleanups
   const hooks = v._hooks;
   if (hooks && hooks.effectCleanups) {
     for (const cl of hooks.effectCleanups) {
@@ -98,7 +31,6 @@ function unmount(v: VNode | null) {
   }
 }
 
-// --- Renderer ---------------------------------------------------------------
 export function render(
   vnode: VNode | null,
   container: HTMLElement
@@ -114,7 +46,7 @@ export function render(
   const dom = diff(container, prev, vnode, inst);
   ROOT_VNODE.set(container, vnode);
   ROOT_INST.set(container, inst);
-  flushEffects(inst); // effects are actually flushed asynchronously (see scheduleFlush)
+  flushEffects(inst);
   return dom;
 }
 
@@ -127,7 +59,6 @@ function diff(
 ): Node | null {
   if (oldVNode === newVNode) return oldVNode?.__dom ?? null;
 
-  // Remove
   if (newVNode == null) {
     if (oldVNode) {
       unmount(oldVNode);
@@ -138,7 +69,6 @@ function diff(
     return null;
   }
 
-  // Component
   if (typeof newVNode.type === "function") {
     return diffComponent(
       parent as HTMLElement,
@@ -149,10 +79,8 @@ function diff(
     );
   }
 
-  // Text node
   if (newVNode.type === TEXT) {
     const oldIsText = oldVNode?.type === TEXT;
-    // If we are replacing a non-text node that was matched (e.g., same key), remove it first:
     if (!oldIsText && oldVNode?.__dom && oldVNode.__dom.parentNode === parent) {
       unmount(oldVNode);
       parent.removeChild(oldVNode.__dom);
@@ -163,23 +91,17 @@ function diff(
         : document.createTextNode("");
     if (!oldVNode || dom.parentNode !== parent)
       parent.insertBefore(dom, nextSibling);
-
-    const text = (newVNode as TextVNode).props.nodeValue;
-    if (dom.nodeValue !== text) {
-      dom.nodeValue = text;
-    }
-
+    const text = (newVNode.props as { nodeValue: string }).nodeValue;
+    if (dom.nodeValue !== text) dom.nodeValue = text;
     newVNode.__dom = dom;
     return dom;
   }
 
-  // Host element (HTML vs SVG)
   let dom: Node;
   const sameType = oldVNode?.type === newVNode.type;
   if (sameType && oldVNode?.__dom) {
     dom = oldVNode.__dom as Element;
   } else {
-    // If we matched an old node (e.g., by key) but the type changed, remove the old one first
     if (!sameType && oldVNode?.__dom && oldVNode.__dom.parentNode === parent) {
       unmount(oldVNode);
       parent.removeChild(oldVNode.__dom);
@@ -193,19 +115,14 @@ function diff(
   }
   newVNode.__dom = dom;
 
-  // Props
   updateProps(
     dom as Element,
     (oldVNode?.props || {}) as Props,
     (newVNode.props || {}) as Props
   );
 
-  // Children (keyed reconciliation with stable reordering; falls back to index for unkeyed)
-  const oldKidsAll = (oldVNode?.children || []) as (VNode | null)[];
-  const newKidsAll = (newVNode.children || []) as (VNode | null)[];
-
-  const oldKids = oldKidsAll.filter(Boolean) as VNode[];
-  const newKids = newKidsAll.filter(Boolean) as VNode[];
+  const oldKids = (oldVNode?.children || []).filter(Boolean) as VNode[];
+  const newKids = (newVNode.children || []).filter(Boolean) as VNode[];
 
   const oldKeyed = new Map<unknown, VNode>();
   const oldUnkeyed: VNode[] = [];
@@ -222,7 +139,6 @@ function diff(
     const newKey = getKey(newK);
 
     let match: VNode | null = null;
-
     if (newKey != null) {
       match = oldKeyed.get(newKey) || null;
       if (match) oldKeyed.delete(newKey);
@@ -239,7 +155,6 @@ function diff(
     }
 
     const childDom = diff(dom, match, newK, inst, null);
-
     if (childDom) {
       const needsMove =
         childDom !== prevDom &&
@@ -266,187 +181,11 @@ function diff(
   return dom;
 }
 
-function isEventProp(name: string) {
-  return /^on/.test(name);
-}
-function toEventName(name: string) {
-  return name.slice(2).toLowerCase();
-}
-function isBooleanProp(name: string) {
-  return ["checked", "disabled", "selected"].includes(name);
-}
-
-function updateProps(dom: Element, prev: Props, next: Props) {
-  // Remove
-  for (const k in prev) {
-    if (!(k in next))
-      setProp(dom, k, null, (prev as Record<string, unknown>)[k]);
-  }
-  // Add/update
-  for (const k in next) {
-    if ((prev as Record<string, unknown>)[k] !== next[k])
-      setProp(dom, k, next[k], (prev as Record<string, unknown>)[k]);
-  }
-}
-
-// --- Style helpers ----------------------------------------------------------
-// Non-dimensional CSS properties should not get a "px" suffix for numeric values.
-// Based on React/Preact lists and common SVG attributes.
-const NON_DIMENSIONAL = new Set([
-  "animationIterationCount",
-  "borderImageOutset",
-  "borderImageSlice",
-  "borderImageWidth",
-  "boxFlex",
-  "boxFlexGroup",
-  "boxOrdinalGroup",
-  "columnCount",
-  "columns",
-  "flex",
-  "flexGrow",
-  "flexPositive",
-  "flexShrink",
-  "flexNegative",
-  "flexOrder",
-  "gridRow",
-  "gridRowEnd",
-  "gridRowSpan",
-  "gridRowStart",
-  "gridColumn",
-  "gridColumnEnd",
-  "gridColumnSpan",
-  "gridColumnStart",
-  "fontWeight",
-  "lineClamp",
-  "lineHeight",
-  "opacity",
-  "order",
-  "orphans",
-  "tabSize",
-  "widows",
-  "zIndex",
-  "zoom",
-  // SVG
-  "fillOpacity",
-  "floodOpacity",
-  "stopOpacity",
-  "strokeMiterlimit",
-  "strokeOpacity",
-  "strokeWidth",
-]);
-
-type StyleObj = Record<string, string | number | null | undefined>;
-
-/** Apply inline styles with diffing, supporting object or string values. */
-function setStyle(dom: HTMLElement, next: unknown, prev: unknown) {
-  // String: set cssText directly (overwrites everything).
-  if (typeof next === "string") {
-    dom.style.cssText = next;
-    return;
-  }
-
-  const prevObj =
-    prev && typeof prev === "object" ? (prev as StyleObj) : undefined;
-  const nextObj =
-    next && typeof next === "object" ? (next as StyleObj) : undefined;
-
-  // Remove keys that disappeared.
-  if (prevObj) {
-    for (const k in prevObj) {
-      if (!nextObj || !(k in nextObj)) {
-        if (k.startsWith("--") || k.includes("-")) dom.style.removeProperty(k);
-        else (dom.style as unknown as Record<string, string>)[k] = "";
-      }
-    }
-  }
-
-  if (!nextObj) return;
-
-  // Apply/overwrite next styles.
-  for (const k in nextObj) {
-    let v = nextObj[k];
-    if (v == null) {
-      if (k.startsWith("--") || k.includes("-")) dom.style.removeProperty(k);
-      else (dom.style as unknown as Record<string, string>)[k] = "";
-      continue;
-    }
-    // Append "px" for numeric values when the property is dimensional.
-    if (typeof v === "number" && !NON_DIMENSIONAL.has(k)) v = `${v}px`;
-
-    if (k.startsWith("--") || k.includes("-")) {
-      dom.style.setProperty(k, String(v));
-    } else {
-      (dom.style as unknown as Record<string, string>)[k] = String(v);
-    }
-  }
-}
-
-function setProp(dom: Element, name: string, value: unknown, prev: unknown) {
-  // Alias: allow React-style "className"
-  const propName = name === "className" ? "class" : name;
-
-  if (propName === "children" || propName === "key") return;
-
-  // Refs: callback or { current }
-  if (propName === "ref") {
-    const cb = value;
-    if (typeof cb === "function") (cb as (el: Element | null) => void)(dom);
-    else if (cb && typeof cb === "object")
-      (cb as { current: Element | null }).current = dom;
-    return;
-  }
-
-  // dangerouslySetInnerHTML
-  if (
-    propName === "dangerouslySetInnerHTML" &&
-    value &&
-    typeof value === "object"
-  ) {
-    const html = (value as { __html?: string }).__html ?? "";
-    (dom as HTMLElement).innerHTML = String(html);
-    return;
-  }
-
-  if (isEventProp(propName)) {
-    const ev = toEventName(propName);
-    if (typeof prev === "function")
-      dom.removeEventListener(ev, prev as EventListener);
-    if (typeof value === "function")
-      dom.addEventListener(ev, value as EventListener);
-    return;
-  }
-
-  // Robust inline style support: string or object, with diffing and units.
-  if (propName === "style") {
-    setStyle(dom as HTMLElement, value, prev);
-    return;
-  }
-
-  const isSvg = dom instanceof SVGElement;
-  const el = dom as HTMLElement & Record<string, unknown>;
-
-  if (!isSvg && propName in el && !isBooleanProp(propName)) {
-    (el as Record<string, unknown>)[propName] =
-      (value as string | number | boolean | null | undefined) ?? "";
-  } else if (isBooleanProp(propName)) {
-    (el as unknown as Record<string, boolean>)[propName] = !!value;
-    if (!value) dom.removeAttribute(propName);
-    else dom.setAttribute(propName, "");
-  } else {
-    if (value == null || value === false) dom.removeAttribute(propName);
-    else dom.setAttribute(propName, value === true ? "" : String(value));
-  }
-}
-
-// --- Components & Hooks ----------------------------------------------------
 let CURRENT: HookBag | null = null;
 
-/** Narrow unknown to a plain object record (non-null) */
 function isObjectRecord(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null;
 }
-
-/** Default shallow equality for memo */
 function shallowEqual(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true;
   if (!isObjectRecord(a) || !isObjectRecord(b)) return false;
@@ -460,23 +199,19 @@ function shallowEqual(a: unknown, b: unknown): boolean {
   return true;
 }
 
-/** Metadata types for memo/forwardRef */
 type MemoMeta<P> = {
   __isMemo: true;
   __compare: (prev: Readonly<P>, next: Readonly<P>) => boolean;
   __inner: FC<P>;
 };
-
 type ForwardRefRenderFunction<P, R = Element> = (
-  props: P & { children?: Child | Child[] },
+  props: P & { children?: unknown },
   ref: Ref<R> | null
 ) => VNode | null;
-
 type ForwardRefMeta<P> = {
   __isForwardRef: true;
   __inner: ForwardRefRenderFunction<P, unknown>;
 };
-
 type MaybeMemoOrFwd = FC<unknown> &
   Partial<MemoMeta<Record<string, unknown>>> &
   Partial<ForwardRefMeta<Record<string, unknown>>>;
@@ -494,29 +229,22 @@ function isForwardRefType(
   );
 }
 
-/** memo: skip re-render when props (including children) are equal */
 export function memo<P>(
   Component: FC<P>,
   areEqual?: (
-    prev: Readonly<P & { children?: Child | Child[] }>,
-    next: Readonly<P & { children?: Child | Child[] }>
+    prev: Readonly<P & { children?: unknown }>,
+    next: Readonly<P & { children?: unknown }>
   ) => boolean
-): FC<P> & MemoMeta<P & { children?: Child | Child[] }> {
-  const Wrapped: FC<P> &
-    Partial<MemoMeta<P & { children?: Child | Child[] }>> = (props) =>
-    Component(props);
+): FC<P> & MemoMeta<P & { children?: unknown }> {
+  const Wrapped: FC<P> & Partial<MemoMeta<P & { children?: unknown }>> = (
+    props
+  ) => Component(props);
   Wrapped.__isMemo = true;
-  Wrapped.__inner = Component as FC<P & { children?: Child | Child[] }>;
-  Wrapped.__compare =
-    areEqual ??
-    (shallowEqual as unknown as (
-      a: Readonly<P & { children?: Child | Child[] }>,
-      b: Readonly<P & { children?: Child | Child[] }>
-    ) => boolean);
-  return Wrapped as FC<P> & MemoMeta<P & { children?: Child | Child[] }>;
+  Wrapped.__inner = Component as FC<P & { children?: unknown }>;
+  Wrapped.__compare = areEqual ?? (shallowEqual as unknown as typeof areEqual);
+  return Wrapped as FC<P> & MemoMeta<P & { children?: unknown }>;
 }
 
-/** forwardRef: pass `ref` as the second argument to the function component */
 export function forwardRef<P, R = Element>(
   render: ForwardRefRenderFunction<P, R>
 ): FC<P> & ForwardRefMeta<P> {
@@ -534,34 +262,28 @@ function diffComponent(
   _inst: HookBag,
   nextSibling: Node | null
 ): Node | null {
-  // Detect memo/forwardRef
   const compType = newVNode.type as MaybeMemoOrFwd;
   const isMemo = isMemoType(compType);
   const isFwd = isForwardRefType(compType);
-
-  // Resolve actual render function
   const renderFn: unknown = isMemo
     ? compType.__inner
     : isFwd
     ? compType.__inner
     : compType;
 
-  // Build props + children (stable shape for comparison)
   const propsWC = {
     ...(newVNode.props || {}),
     children: newVNode.children,
   } as Record<string, unknown>;
 
-  // If memo and we have a previous VNode, compare props
   if (isMemo && oldVNode) {
-    const prevPropsWC = oldVNode._propsWC ?? {
-      ...(oldVNode.props || {}),
-      children: oldVNode.children,
-    };
-    const equal = compType.__compare(
-      prevPropsWC as Readonly<Record<string, unknown>>,
-      propsWC as Readonly<Record<string, unknown>>
-    );
+    const prevPropsWC =
+      oldVNode._propsWC ??
+      ({ ...(oldVNode.props || {}), children: oldVNode.children } as Record<
+        string,
+        unknown
+      >);
+    const equal = compType.__compare(prevPropsWC, propsWC);
     if (equal) {
       newVNode._rendered = oldVNode._rendered ?? null;
       newVNode.__dom = oldVNode.__dom ?? null;
@@ -571,7 +293,6 @@ function diffComponent(
     }
   }
 
-  // Prepare component hook bag
   const comp: HookBag = {
     hooks: oldVNode?._hooks?.hooks ?? [],
     hookIndex: 0,
@@ -580,7 +301,6 @@ function diffComponent(
   };
   CURRENT = comp;
 
-  // forwardRef: pass ref as second arg and remove from props object
   let rendered: VNode | null;
   if (isFwd) {
     const ref = ((newVNode.props as { ref?: Ref | null }).ref ??
@@ -589,10 +309,9 @@ function diffComponent(
       string,
       unknown
     >;
-    const refU = ref as unknown as Ref<unknown> | null;
     rendered = (
       renderFn as ForwardRefRenderFunction<Record<string, unknown>, unknown>
-    )(clean, refU);
+    )(clean, ref as unknown as Ref<unknown> | null);
   } else {
     rendered = (renderFn as FC<Record<string, unknown>>)(propsWC);
   }
@@ -610,10 +329,7 @@ function diffComponent(
   newVNode.__dom = dom;
   newVNode._hooks = comp;
   newVNode._propsWC = propsWC;
-
-  // Store a DOM handle so we can find the correct root (multi-root safe).
   comp.__node = dom ?? null;
-
   queueEffectFlush(comp);
   return dom;
 }
@@ -624,10 +340,9 @@ export function useState<S>(
   const comp = CURRENT;
   if (!comp) throw new Error("useState must be called inside a component");
   const i = comp.hookIndex++;
-  if (comp.hooks[i] === undefined) {
+  if (comp.hooks[i] === undefined)
     comp.hooks[i] =
       typeof initial === "function" ? (initial as () => S)() : initial;
-  }
   const setState = (v: S | ((prev: S) => S)) => {
     const next =
       typeof v === "function" ? (v as (p: S) => S)(comp.hooks[i] as S) : v;
@@ -648,9 +363,7 @@ export function useReducer<S, A>(
   const [state, setState] = useState<S>(
     typeof initialArg === "function" ? (initialArg as () => S)() : initialArg
   );
-  const dispatch = (action: A) => {
-    setState((prev) => reducer(prev, action));
-  };
+  const dispatch = (action: A) => setState((prev) => reducer(prev, action));
   return [state, dispatch];
 }
 
@@ -663,9 +376,7 @@ export function useEffect(
   const i = comp.hookIndex++;
   const prev = comp.hooks[i] as { deps?: unknown[] } | undefined;
   const changed =
-    !prev ||
-    !deps ||
-    deps.some((d: unknown, idx: number) => !Object.is(d, prev.deps?.[idx]));
+    !prev || !deps || deps.some((d, idx) => !Object.is(d, prev.deps?.[idx]));
   comp.hooks[i] = { deps };
   if (changed) comp.effects.push({ i, effect });
 }
@@ -674,9 +385,7 @@ export function useRef<T>(initial: T): { current: T } {
   const comp = CURRENT;
   if (!comp) throw new Error("useRef must be called inside a component");
   const i = comp.hookIndex++;
-  if (comp.hooks[i] === undefined) {
-    comp.hooks[i] = { current: initial };
-  }
+  if (comp.hooks[i] === undefined) comp.hooks[i] = { current: initial };
   return comp.hooks[i] as { current: T };
 }
 
@@ -684,27 +393,21 @@ export function useMemo<T>(factory: () => T, deps?: readonly unknown[]): T {
   const comp = CURRENT;
   if (!comp) throw new Error("useMemo must be called inside a component");
   const i = comp.hookIndex++;
-
   type Slot = { deps?: readonly unknown[]; value: T };
   const prev = comp.hooks[i] as Slot | undefined;
-
   const changed =
     !prev ||
     !deps ||
     prev.deps?.length !== deps.length ||
     deps.some((d, idx) => !Object.is(d, prev.deps?.[idx]));
-
   if (changed) {
     const value = factory();
     if (prev) {
       prev.deps = deps;
       prev.value = value;
       comp.hooks[i] = prev;
-    } else {
-      comp.hooks[i] = { deps, value } as Slot;
-    }
+    } else comp.hooks[i] = { deps, value } as Slot;
   }
-
   return (comp.hooks[i] as Slot).value;
 }
 
@@ -715,15 +418,12 @@ export function useCallback<T extends (...args: unknown[]) => unknown>(
   return useMemo(() => fn, deps) as T;
 }
 
-// --- Effects ---------------------------------------------------------------
 let __scheduled = false;
-
 function scheduleFlush() {
   if (__scheduled) return;
   __scheduled = true;
   Promise.resolve().then(() => {
     __scheduled = false;
-    // Flush pending effects for all roots marked with [data-tiny-vdom-root]
     const roots = new Set<HTMLElement>();
     document
       .querySelectorAll<HTMLElement>("[data-tiny-vdom-root]")
@@ -755,19 +455,16 @@ function scheduleFlush() {
     }
   });
 }
-
 function queueEffectFlush(comp: HookBag) {
   comp.__needsFlush = true;
   comp.__root = findRoot(comp);
   scheduleFlush();
 }
-
 function flushEffects(_inst: HookBag) {
-  /* no-op: effects are flushed asynchronously by scheduleFlush() */
+  /* no-op: flush async */
 }
 
 function findRoot(comp: HookBag): HTMLElement | null {
-  // Find the nearest ancestor root for this component using the stored DOM node.
   const node = comp.__node as
     | (Node & { parentElement?: Element | null })
     | null;
@@ -777,7 +474,6 @@ function findRoot(comp: HookBag): HTMLElement | null {
   return root;
 }
 
-// Helper to mount an app quickly. Adds [data-tiny-vdom-root], used by the scheduler to discover roots and flush effects.
 export function mount(
   vnode: VNode | null,
   container: HTMLElement
@@ -789,12 +485,9 @@ export function mount(
 
 function cloneVNode(v: VNode | null): VNode | null {
   if (!v) return v;
-  // Shallow clone is enough to trigger re-render; _rendered will be recalculated
-  const c = { ...v } as VNode;
-  return c;
+  return { ...v } as VNode;
 }
 
-// Default export for convenience
 const tiny = {
   h,
   render,
