@@ -1,4 +1,4 @@
-import { h } from "@tiny/core.ts";
+import { h } from "@tiny/index.ts";
 import Icon from "@icons/Icon.tsx";
 import Logo from "./Logo.tsx";
 

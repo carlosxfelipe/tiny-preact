@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "@tiny/core.ts";
+import { useEffect, useRef, useState } from "@tiny/index.ts";
 
 type Listener = () => void;
 

@@ -1,4 +1,4 @@
-import { h, useEffect } from "@tiny/core.ts";
+import { h, useEffect } from "@tiny/index.ts";
 import Icon from "@icons/Icon.tsx";
 import Button from "@components/Button.tsx";
 import { StyleSheet } from "@styles/stylesheet.ts";

@@ -1,4 +1,4 @@
-import { h, useRef } from "@tiny/core.ts";
+import { h, useRef } from "@tiny/index.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 
 export default function HomePage() {

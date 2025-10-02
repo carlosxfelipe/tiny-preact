@@ -1,7 +1,7 @@
 import "@styles/global.css";
 import "@styles/navbar.css";
 import "@styles/auth.css";
-import { h, mount, useEffect, useState } from "@tiny/core.ts";
+import { h, mount, useEffect, useState } from "@tiny/index.ts";
 import Layout from "@layout/Layout.tsx";
 import {
   ROUTES,

@@ -1,5 +1,5 @@
 import "@styles/auth.css";
-import { h, useState } from "@tiny/core.ts";
+import { h, useState } from "@tiny/index.ts";
 import Button from "@components/Button.tsx";
 import Icon from "@icons/Icon.tsx";
 import { navigate } from "@src/router/router.ts";

@@ -20,6 +20,7 @@
   },
   "imports": {
     "@std/http/file-server": "jsr:@std/http/file-server",
+    "@tiny": "./tiny-vdom/index.ts",
     "@tiny/": "./tiny-vdom/",
     "@lib/": "./src/lib/",
     "@src/": "./src/",

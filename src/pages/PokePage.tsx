@@ -1,4 +1,4 @@
-import { h, useEffect, useRef, useState } from "@tiny/core.ts";
+import { h, useEffect, useRef, useState } from "@tiny/index.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 import { http } from "@lib/http.ts";
 import { getSearch, navigate } from "@src/router/router.ts";
