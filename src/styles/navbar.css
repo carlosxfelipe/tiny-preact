@@ -21,6 +21,10 @@
 }
 
 .nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--fg);
@@ -30,6 +34,7 @@
 
 .nav-links {
   display: flex;
+  align-items: center;
   gap: 12px;
 }
 
@@ -37,6 +42,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  line-height: 1;
+  padding: 0 14px;
+  height: 40px;
   color: var(--muted);
   text-decoration: none;
   padding: 6px 12px;
@@ -45,6 +53,12 @@
   border: 1px solid transparent;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
     transform 0.05s ease;
+}
+
+.nav-link svg,
+.nav-brand svg {
+  display: block;
+  flex-shrink: 0;
 }
 
 .nav-link:hover {
