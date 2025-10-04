@@ -16,6 +16,9 @@
   overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  --btn-bg: var(--card-bg);
+  --btn-border: var(--card-border);
+  --btn-hover: color-mix(in srgb, var(--card-bg) 94%, var(--fg) 6%);
 }
 
 .auth-form-side {
@@ -72,10 +75,28 @@
   width: 100%;
   padding: 12px 40px 12px 36px;
   border: 1px solid var(--card-border);
-  background: var(--bg);
+  background: var(--card-bg);
   color: var(--fg);
   border-radius: 12px;
   outline: none;
+  caret-color: var(--fg);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background 0.15s ease, color 0.15s ease;
+}
+
+.auth-input::placeholder {
+  color: var(--muted);
+  opacity: 0.9;
+}
+
+.auth-input:hover {
+  border-color: var(--btn-border);
+  background: var(--btn-hover);
+}
+
+.auth-input:focus-visible {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
 }
 
 .auth-ghost-icon-btn {
@@ -89,6 +110,17 @@
   border-radius: 8px;
   cursor: pointer;
   color: var(--muted);
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-ghost-icon-btn:hover {
+  background: var(--btn-hover);
+  color: var(--fg);
+}
+
+.auth-ghost-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }
 
 .auth-row-between {
@@ -140,6 +172,22 @@
   cursor: pointer;
   font-weight: 600;
   color: var(--fg);
+  transition: background 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.auth-social-btn:hover {
+  background: var(--btn-hover);
+}
+
+.auth-social-btn:active {
+  transform: translateY(1px);
+}
+
+.auth-social-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-color: var(--primary);
 }
 
 .auth-art-side {
@@ -171,5 +219,21 @@
   }
   .auth-art-side {
     display: none;
+  }
+}
+
+@media (hover: none) {
+  .auth-input:hover {
+    background: var(--card-bg);
+    border-color: var(--card-border);
+  }
+  .auth-social-btn:hover {
+    background: var(--btn-bg);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-card {
+    --btn-hover: color-mix(in srgb, var(--card-bg) 88%, var(--fg) 12%);
   }
 }

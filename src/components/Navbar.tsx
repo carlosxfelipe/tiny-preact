@@ -1,4 +1,4 @@
-import { h } from "@tiny/index.ts";
+import { h, useState, useEffect } from "@tiny/index.ts";
 import Icon from "@icons/Icon.tsx";
 import Logo from "./Logo.tsx";
 
@@ -15,7 +15,15 @@ export default function Navbar({ currentPath = "#/" }: NavbarProps) {
   ];
 
   const isActive = (href: string) =>
-    href === "#/" ? currentPath === "#/" : currentPath?.startsWith(href);
+    href === "#/" ? currentPath === "#/" : currentPath.startsWith(href);
+
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onHash = () => setOpen(false);
+    globalThis.addEventListener?.("hashchange", onHash);
+    return () => globalThis.removeEventListener?.("hashchange", onHash);
+  }, []);
 
   return (
     <header class="navbar" role="navigation" aria-label="Principal">
@@ -23,11 +31,12 @@ export default function Navbar({ currentPath = "#/" }: NavbarProps) {
         <a href="#/" class="nav-brand" aria-label="Página inicial Tiny-vdom">
           <Logo height={28} showText />
         </a>
+
         <nav class="nav-links">
           {links.map(({ href, label, icon }) => (
             <a
               href={href}
-              class="nav-link"
+              class={`nav-link${isActive(href) ? " active" : ""}`}
               aria-current={isActive(href) ? "page" : undefined}
               aria-label={label}
             >
@@ -36,7 +45,35 @@ export default function Navbar({ currentPath = "#/" }: NavbarProps) {
             </a>
           ))}
         </nav>
+
+        <button
+          type="button"
+          class="nav-toggle"
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={open}
+          aria-controls="nav-menu"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <Icon name={open ? "close" : "menu"} size={20} aria-hidden="true" />
+        </button>
       </div>
+
+      {open && (
+        <div id="nav-menu" class="nav-menu" role="menu">
+          {links.map(({ href, label, icon }) => (
+            <a
+              href={href}
+              role="menuitem"
+              class={`nav-menu-item${isActive(href) ? " active" : ""}`}
+              aria-current={isActive(href) ? "page" : undefined}
+              onClick={() => setOpen(false)}
+            >
+              <Icon name={icon} size={18} aria-hidden="true" />
+              <span>{label}</span>
+            </a>
+          ))}
+        </div>
+      )}
     </header>
   );
 }

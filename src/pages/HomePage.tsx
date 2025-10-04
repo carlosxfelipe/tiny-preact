@@ -55,10 +55,13 @@ export default function HomePage() {
               🧠
             </span>
             <div style={styles.featureText}>
-              <strong>Gerenciamento de estado</strong>: inspirado em zustand,
-              com <code>createStore</code>, <em>set</em>/<em>get</em>,
-              selectors, persistência opcional em <code>localStorage</code>,
-              suporte a assinaturas e sincronização entre abas.
+              <strong style={styles.featureTitle}>
+                Gerenciamento de estado
+              </strong>
+              : inspirado em zustand, com <code>createStore</code>, <em>set</em>
+              /<em>get</em>, selectors, persistência opcional em{" "}
+              <code>localStorage</code>, suporte a assinaturas e sincronização
+              entre abas.
             </div>
           </li>
           <li style={styles.featureItem}>
@@ -66,13 +69,15 @@ export default function HomePage() {
               🎨
             </span>
             <div style={styles.featureText}>
-              <strong>StyleSheet utilitário</strong>: inspirado no React Native,
-              permitindo declarar estilos em objetos TypeScript, fazer
-              merge/compose de estilos e usar variáveis CSS de forma prática.
+              <strong style={styles.featureTitle}>StyleSheet utilitário</strong>
+              : inspirado no React Native, permitindo declarar estilos em
+              objetos TypeScript, fazer merge/compose de estilos e usar
+              variáveis CSS de forma prática.
             </div>
           </li>
         </ul>
       </div>
+
       <p>
         Paralelamente, também estou desenvolvendo um segundo projeto, o{" "}
         <a
@@ -120,7 +125,7 @@ const styles = StyleSheet.create({
     padding: 10,
     border: "1px solid var(--btn-border)",
     borderRadius: 12,
-    background: "var(--btn-bg)",
+    background: "color-mix(in srgb, var(--primary) 8%, white)",
   },
   emoji: {
     fontSize: 18,
@@ -128,4 +133,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   featureText: {},
+  featureTitle: {
+    color: "var(--primary)",
+  },
 });
