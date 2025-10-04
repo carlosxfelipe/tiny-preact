@@ -2,6 +2,7 @@ import { h, useEffect, useRef, useState } from "@tiny/index.ts";
 import { StyleSheet } from "@styles/stylesheet.ts";
 import { http } from "@lib/http.ts";
 import { getSearch, navigate } from "@src/router/router.ts";
+import Button from "@components/Button.tsx";
 
 type ApiResult = {
   results: Array<{ name: string; url: string }>;
@@ -123,27 +124,29 @@ export default function PokePage() {
       </header>
 
       <div style={styles.pager}>
-        <button
-          type="button"
-          style={{ ...styles.pagerBtn, opacity: canPrev ? 1 : 0.5 }}
-          onClick={goPrev}
-          disabled={!canPrev}
-          aria-label="Página anterior"
+        <div
+          style={{
+            opacity: canPrev ? 1 : 0.5,
+            pointerEvents: canPrev ? "auto" : "none",
+          }}
         >
-          ◀ Anterior
-        </button>
+          <Button ariaLabel="Página anterior" onClick={goPrev}>
+            ◀ Anterior
+          </Button>
+        </div>
         <span style={styles.pagerLabel}>
           Página {page + 1} / {TOTAL_PAGES}
         </span>
-        <button
-          type="button"
-          style={{ ...styles.pagerBtn, opacity: canNext ? 1 : 0.5 }}
-          onClick={goNext}
-          disabled={!canNext}
-          aria-label="Próxima página"
+        <div
+          style={{
+            opacity: canNext ? 1 : 0.5,
+            pointerEvents: canNext ? "auto" : "none",
+          }}
         >
-          Próxima ▶
-        </button>
+          <Button ariaLabel="Próxima página" onClick={goNext}>
+            Próxima ▶
+          </Button>
+        </div>
       </div>
 
       {error ? (
@@ -225,16 +228,6 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 12,
   },
-  pagerBtn: {
-    appearance: "none",
-    border: "1px solid var(--btn-border)",
-    background: "var(--btn-bg)",
-    color: "var(--fg)",
-    padding: "8px 12px",
-    borderRadius: 10,
-    fontWeight: 600,
-    cursor: "pointer",
-  },
   pagerLabel: {
     flex: 1,
     textAlign: "center",
@@ -263,7 +256,6 @@ const styles = StyleSheet.create({
     background: "transparent",
     border: 0,
     padding: 12,
-    // cursor: "pointer",
     color: "var(--fg)",
   },
   thumbWrap: {

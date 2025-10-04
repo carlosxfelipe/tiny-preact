@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     padding: 10,
     border: "1px solid var(--btn-border)",
     borderRadius: 12,
-    background: "color-mix(in srgb, var(--primary) 8%, white)",
+    background: "var(--card-inner-bg)",
   },
   emoji: {
     fontSize: 18,

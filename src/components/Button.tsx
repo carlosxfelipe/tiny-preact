@@ -120,30 +120,34 @@ const styles = StyleSheet.create({
   buttonPrimary: {
     background: "var(--primary)",
     borderColor: "var(--primary)",
-    color: "#fff",
+    color: "var(--on-primary)",
   },
   buttonPrimaryHover: {
     background: "var(--primary-hover)",
     borderColor: "var(--primary-hover)",
+    color: "var(--on-primary)",
   },
   buttonPrimaryActive: {
     transform: "translateY(1px)",
     background: "var(--primary-hover)",
     borderColor: "var(--primary-hover)",
+    color: "var(--on-primary)",
   },
   buttonDanger: {
     background: "var(--danger)",
     borderColor: "var(--danger)",
-    color: "#fff",
+    color: "var(--on-error)",
   },
   buttonDangerHover: {
     background: "var(--danger-hover)",
     borderColor: "var(--danger-hover)",
+    color: "var(--on-error)",
   },
   buttonDangerActive: {
     transform: "translateY(1px)",
     background: "var(--danger-hover)",
     borderColor: "var(--danger-hover)",
+    color: "var(--on-error)",
   },
   buttonFocus: { boxShadow: "var(--ring)" },
 });
